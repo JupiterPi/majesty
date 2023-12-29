@@ -31,12 +31,12 @@ class Game(
         }
 
         players.forEach { player ->
-            player.score -= 1 * player.infirmary.size
+            player.score -= (if (bSide) 2 else 1) * player.infirmary.size
             player.score += player.cards.count { it.value.isNotEmpty() }.toDouble().pow(2).toInt()
         }
         Place.entries.forEach { place ->
             val maxCards = players.maxOf { it.cards[place]!!.size }
-            players.filter { it.cards[place]!!.size == maxCards }.forEach { it.score += place.maximumCardsBonus }
+            players.filter { it.cards[place]!!.size == maxCards }.forEach { it.score += place.getMaximumCardsBonus(this) }
         }
 
         val maxScore = players.maxOf { it.score }
@@ -80,43 +80,68 @@ class Player(val name: String) {
 
 enum class Place(
     private val aSideEffect: suspend (player: Player) -> Unit,
+    private val bSideEffect: suspend (player: Player) -> Unit,
+    private val bSideMaxCardsBonus: Int,
 ) {
     MILL({ player ->
-        player.score += 1 * player.cards[MILL]!!.size
-    }),
+        player.score += 2 * player.cards[MILL]!!.size
+    }, { player ->
+        player.score += 2 * player.cards[MILL]!!.size
+        player.game.players.filter { it.cards[COTTAGE]!!.size >= 1 }.forEach { it.score += 3 }
+    }, 14),
     BREWERY({ player ->
         player.score += 2 * player.cards[BREWERY]!!.size
         player.meeples += 1 * player.cards[BREWERY]!!.size
         player.game.players.filter { it.cards[MILL]!!.size >= 1 }.forEach { it.score += 2 }
-    }),
+    }, { player ->
+        player.meeples += 1 * (player.cards[MILL]!!.size + player.cards[BREWERY]!!.size)
+        player.game.players.filter { it.cards[INN]!!.size >= 1 && it.cards[CASTLE]!!.size >= 1 }.forEach { it.score += 10 }
+    }, 12),
     COTTAGE({ player ->
         player.infirmary.removeFirstOrNull()?.let { player.cards[player.handler.requestHealedCardPlace(it)]!! += it }
         player.score += 2 * (player.cards[MILL]!!.size + player.cards[BREWERY]!!.size + player.cards[COTTAGE]!!.size)
-    }),
+    }, { player ->
+        player.score += 3 * player.cards[COTTAGE]!!.size
+    }, 12),
     GUARDHOUSE({ player ->
         player.score += 2 * (player.cards[GUARDHOUSE]!!.size + player.cards[BARRACKS]!!.size + player.cards[INN]!!.size)
-    }),
+    }, { player ->
+        player.score += 2 * (player.cards[BREWERY]!!.size + player.cards[COTTAGE]!!.size + player.cards[GUARDHOUSE]!!.size)
+        player.game.players.filter { it.cards[INN]!!.size >= 1 }.forEach { it.score += 3 }
+    }, 8),
     BARRACKS({ player ->
         player.game.players.filter { it != player }.forEach {
             if (it.cards[GUARDHOUSE]!!.size < player.cards[BARRACKS]!!.size + 1) it.injureCard()
         }
         player.score += 3 * player.cards[BARRACKS]!!.size
-    }),
+    }, { player ->
+        player.game.players.filter { it != player }.forEach {
+            if (it.cards[GUARDHOUSE]!!.size < player.cards[BARRACKS]!!.size + 1) it.injureCard()
+        }
+        player.score += 3 * (player.cards[BARRACKS]!!.size + player.cards[INN]!!.size + player.cards[CASTLE]!!.size)
+    }, 8),
     INN({ player ->
         player.score += 4 * player.cards[INN]!!.size
         player.game.players.filter { it.cards[BREWERY]!!.size >= 1 }.forEach { it.score += 3 }
-    }),
+    }, { player ->
+        player.score += player.cards[INN]!!.size * 2 * player.cards.maxOf { it.value.size }
+    }, 12),
     CASTLE({ player ->
         player.score += 5 * player.cards[CASTLE]!!.size
         player.meeples += 5 * player.cards[CASTLE]!!.size
-    });
+    }, { player ->
+        val buySellMeeples = player.handler.requestBuySellMeeples()
+        player.meeples += buySellMeeples
+        player.score -= buySellMeeples
+        player.score += 4 * (player.cards[CASTLE]!!.size + player.infirmary.size)
+    }, 16);
 
     suspend fun applyEffect(player: Player) {
         if (!player.game.bSide) aSideEffect(player)
-        if (player.game.bSide) { /*TODO implement b side effects */ }
+        if (player.game.bSide) bSideEffect(player)
     }
 
-    val maximumCardsBonus get() = 10 + Place.entries.indexOf(this)
+    fun getMaximumCardsBonus(game: Game) = if (game.bSide) bSideMaxCardsBonus else 10 + Place.entries.indexOf(this)
 }
 
 class Card(

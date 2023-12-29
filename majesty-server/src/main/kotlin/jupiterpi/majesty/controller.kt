@@ -58,6 +58,11 @@ class PlayerSocketHandler(
     }
     override suspend fun requestHealedCardPlace(card: Card): Place = request("healed_card_place", CardDTO(card))
 
+    override suspend fun requestBuySellMeeples(): Int {
+        @Serializable data class BuySellMeeplesDTO(val buySellMeeples: Int)
+        return request<BuySellMeeplesDTO>("buy_sell_meeples").buySellMeeples
+    }
+
     override suspend fun displayResults(results: PlayerHandler.Results) {
         @Serializable data class ResultsDTO(val winner: List<String>)
         send("results", ResultsDTO(results.winner.map { it.name }))
