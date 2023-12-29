@@ -7,15 +7,16 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
+import kotlinx.serialization.json.Json
 import java.time.Duration
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
         .start(wait = true)
 }
+
+val serialization = Json
 
 fun Application.module() {
     install(CORS) {
@@ -30,7 +31,7 @@ fun Application.module() {
     }
 
     install(ContentNegotiation) {
-        json()
+        json(serialization)
     }
 
     install(WebSockets) {
@@ -40,9 +41,5 @@ fun Application.module() {
         masking = false
     }
 
-    routing {
-        get("test") {
-            call.respondText("Hey there!", status = HttpStatusCode.OK)
-        }
-    }
+    configureController()
 }

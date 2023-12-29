@@ -45,11 +45,8 @@ class Game(
     }
 }
 
-class Player(
-    val name: String,
-    val color: Color,
-    val handler: PlayerHandler,
-) {
+class Player(val name: String) {
+    lateinit var handler: PlayerHandler
     lateinit var game: Game
 
     val cards = mapOf(*Place.entries.map { it to mutableListOf<Card>() }.toTypedArray())
@@ -79,10 +76,6 @@ class Player(
         meeples -= excessMeeples
         score += 1 * excessMeeples
     }
-}
-
-enum class Color {
-    RED, GREEN, BLUE, YELLOW
 }
 
 enum class Place(
