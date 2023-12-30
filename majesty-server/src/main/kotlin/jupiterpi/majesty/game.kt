@@ -8,6 +8,10 @@ class Game(
     val bSide: Boolean = false,
 ) {
     val cardsStack = mutableListOf<Card>()
+
+    class CardInQueue(val card: Card, var meeples: Int)
+    val cardsQueue = mutableListOf<CardInQueue>()
+
     init {
         val tier1Cards = when (players.size) {
             2 -> 6; 3 -> 14; 4 -> 26
@@ -19,10 +23,8 @@ class Game(
         repeat(6) { cardsQueue += CardInQueue(cardsStack.removeFirst(), 0) }
     }
 
-    class CardInQueue(val card: Card, var meeples: Int)
-    val cardsQueue = mutableListOf<CardInQueue>()
-
     suspend fun run() {
+        players.forEach { it.handler.refreshGameState() }
         repeat(12) {
             players.forEach {
                 it.runTurn()
@@ -48,6 +50,7 @@ class Game(
 class Player(val name: String) {
     lateinit var handler: PlayerHandler
     lateinit var game: Game
+    val gameHasStarted get() = ::game.isInitialized
 
     val cards = mapOf(*Place.entries.map { it to mutableListOf<Card>() }.toTypedArray())
 

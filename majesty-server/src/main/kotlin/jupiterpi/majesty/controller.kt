@@ -1,16 +1,18 @@
 package jupiterpi.majesty
 
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import java.util.*
 
-class Lobby {
-    val gameId = UUID.randomUUID().toString()
+class Lobby(val gameId: String) {
     val players = mutableListOf<Player>()
 }
 
@@ -26,35 +28,48 @@ fun Application.configureController() {
                 val dto = call.receive<JoinGameDTO>()
                 val gameId: String = call.parameters["id"]!!
 
-                val lobby = lobbies.singleOrNull { it.gameId == gameId } ?: Lobby().also { lobbies += it }
+                val lobby = lobbies.singleOrNull { it.gameId == gameId } ?: Lobby(gameId).also { lobbies += it }
                 lobby.players += Player(dto.name)
+
+                call.respondText("Joined player", status = HttpStatusCode.OK)
             }
             post("start") {
                 val gameId: String = call.parameters["id"]!!
                 val lobby = lobbies.single { it.gameId == gameId }
                 lobbies -= lobby
-                games[gameId] = Game(lobby.players)
+                val game = Game(lobby.players)
+                game.players.forEach { it.game = game }
+                games[gameId] = game
+
+                call.respondText("Started game", status = HttpStatusCode.OK)
+
+                launch { game.run() }
             }
 
             webSocket("game/{player}") {
-                val game = games[call.parameters["id"]]!!
-                val player = game.players.single { it.name == call.parameters["player"] }
-                player.handler = PlayerSocketHandler(game, this).also { it.runResponseLoop() }
+                val player = (games[call.parameters["id"]!!]?.players ?: lobbies.single { it.gameId == call.parameters["id"]!! }.players)
+                    .single { it.name == call.parameters["player"]!! }
+
+                val handler = PlayerSocketHandler(player, this)
+                player.handler = handler
+
+                if (player.gameHasStarted) handler.refreshGameState()
+                handler.runResponseLoop()
             }
         }
     }
 }
 
 class PlayerSocketHandler(
-    private val game: Game,
+    private val player: Player,
     private val session: DefaultWebSocketServerSession,
 ) : PlayerHandler {
-    override suspend fun refreshGameState() = send("game", GameDTO(game))
+    override suspend fun refreshGameState() = sendPacket("game", GameDTO(player.game))
 
     override suspend fun requestCardFromQueue(): PlayerHandler.CardChoice {
         @Serializable data class CardChoiceDTO(val cardIndex: Int, val place: Place)
         val response = request<CardChoiceDTO>("card_from_queue")
-        return PlayerHandler.CardChoice(game.cardsQueue[response.cardIndex], response.place)
+        return PlayerHandler.CardChoice(player.game.cardsQueue[response.cardIndex], response.place)
     }
     override suspend fun requestHealedCardPlace(card: Card): Place = request("healed_card_place", CardDTO(card))
 
@@ -65,7 +80,7 @@ class PlayerSocketHandler(
 
     override suspend fun displayResults(results: PlayerHandler.Results) {
         @Serializable data class ResultsDTO(val winner: List<String>)
-        send("results", ResultsDTO(results.winner.map { it.name }))
+        sendPacket("results", ResultsDTO(results.winner.map { it.name }))
     }
 
     /* --- */
@@ -89,7 +104,7 @@ class PlayerSocketHandler(
     private suspend fun requestRaw(type: String, payload: String? = null): String {
         val requestId = UUID.randomUUID().toString()
         @Serializable data class SocketRequest(val requestId: String, val type: String, val payload: String?)
-        send("request", SocketRequest(requestId, type, payload))
+        sendPacket("request", SocketRequest(requestId, type, payload))
 
         while (true) {
             delay(100)
@@ -98,5 +113,6 @@ class PlayerSocketHandler(
         }
     }
 
-    private suspend fun <T> send(type: String, packet: T) = session.sendSerialized(mapOf(type to packet))
+    @Serializable private data class Packet<T>(val topic: String, val payload: T)
+    private suspend inline fun <reified T> sendPacket(topic: String, payload: T) = session.sendSerialized(Packet(topic, payload))
 }

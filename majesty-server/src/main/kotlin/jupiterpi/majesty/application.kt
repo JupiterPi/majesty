@@ -1,6 +1,7 @@
 package jupiterpi.majesty
 
 import io.ktor.http.*
+import io.ktor.serialization.kotlinx.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -20,13 +21,16 @@ val serialization = Json
 
 fun Application.module() {
     install(CORS) {
+        allowMethod(HttpMethod.Options)
         allowMethod(HttpMethod.Get)
         allowMethod(HttpMethod.Post)
-        allowMethod(HttpMethod.Options)
         allowMethod(HttpMethod.Put)
         allowMethod(HttpMethod.Delete)
         allowMethod(HttpMethod.Patch)
+
+        allowHeader(HttpHeaders.ContentType)
         allowHeader(HttpHeaders.Authorization)
+
         anyHost()
     }
 
@@ -39,6 +43,7 @@ fun Application.module() {
         timeout = Duration.ofSeconds(15)
         maxFrameSize = Long.MAX_VALUE
         masking = false
+        contentConverter = KotlinxWebsocketSerializationConverter(serialization)
     }
 
     configureController()
