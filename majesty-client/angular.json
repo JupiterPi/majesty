@@ -102,5 +102,7 @@
       }
     }
   },
-  "defaultProject": "majesty-client"
+  "cli": {
+    "analytics": "f3ac8630-8325-44bd-b527-1a6c72cef6cd"
+  }
 }

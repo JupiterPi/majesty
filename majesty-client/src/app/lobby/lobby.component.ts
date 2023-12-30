@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
 import {ApiService} from "../api.service";
 import {SocketService} from "../socket.service";
+import {CookieService} from "ngx-cookie";
 
 @Component({
   selector: 'app-lobby',
@@ -8,14 +9,15 @@ import {SocketService} from "../socket.service";
   styleUrls: ['./lobby.component.scss']
 })
 export class LobbyComponent {
-  playerName = "Bob";
+  playerName = this.cookies.get("name") ?? "";
   gameId = "";
   joined = false;
 
-  constructor(private api: ApiService, private socket: SocketService) {}
+  constructor(private cookies: CookieService, private api: ApiService, private socket: SocketService) {}
 
   join() {
-    if (this.gameId == "") return;
+    if (this.playerName == "" || this.gameId == "") return;
+    this.cookies.put("name", this.playerName);
     this.api.joinGame(this.gameId, this.playerName).subscribe(() => {
       this.socket.connect(this.gameId, this.playerName, () => {
         this.joined = true;

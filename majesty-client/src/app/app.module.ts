@@ -7,6 +7,7 @@ import {RouterModule} from "@angular/router";
 import { LobbyComponent } from './lobby/lobby.component';
 import {FormsModule} from "@angular/forms";
 import { GameComponent } from './game/game.component';
+import {CookieModule} from "ngx-cookie";
 
 @NgModule({
   declarations: [
@@ -21,6 +22,7 @@ import { GameComponent } from './game/game.component';
       {path: "", component: AppComponent},
     ]),
     FormsModule,
+    CookieModule.withOptions(),
   ],
   providers: [],
   bootstrap: [AppComponent]
