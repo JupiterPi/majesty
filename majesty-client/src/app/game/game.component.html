@@ -6,7 +6,7 @@
     <div class="card">
       <div class="card-place" *ngFor="let place of card.card.places" [class]="'clr-' + place.toLowerCase()"
            [class.selectable]="queueSelectable" (click)="selectCardInQueue(place)">
-        <span class="not-selectable">{{place.substring(0, 1)}}</span>
+        <div class="icon" [style]='"mask: url(\"assets/icons/" + place.toLowerCase() + ".svg\") center/contain no-repeat;"' [class]="'clr-' + place.toLowerCase()"></div>
       </div>
     </div>
   </div>

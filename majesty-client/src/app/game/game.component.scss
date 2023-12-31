@@ -86,7 +86,6 @@ $clr-castle: #9a52d5;
         flex-grow: 1;
 
         box-sizing: border-box;
-        padding: 15px 20px;
         font-size: 120%;
         border-radius: 10px;
 
@@ -94,6 +93,15 @@ $clr-castle: #9a52d5;
           outline: 3px solid #656565;
           outline-offset: 3px;
           cursor: pointer;
+        }
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        .icon {
+          $size: 30px; height: $size; width: $size;
+          filter: brightness(80%) saturate(200%);
         }
       }
     }
