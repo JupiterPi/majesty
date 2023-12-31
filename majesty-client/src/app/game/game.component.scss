@@ -1,0 +1,211 @@
+$clr-container-background: #f1f1f1;
+$clr-text-muted: #4b4b4b;
+$clr-meeple: #b0b0b0;
+
+$place-color-white-factor: 40%;
+$place-color-darken-text: 20%;
+$clr-mill: #fd973b;
+$clr-brewery: #a97841;
+$clr-cottage: #6ea82d;
+$clr-guardhouse: #43aad0;
+$clr-barracks: #d0505b;
+$clr-inn: #efbd10;
+$clr-castle: #9a52d5;
+
+.clr-mill {
+  background-color: mix(white, $clr-mill, $place-color-white-factor);
+  color: darken($clr-mill, $place-color-darken-text);
+}
+.clr-brewery {
+  background-color: mix(white, $clr-brewery, $place-color-white-factor);
+  color: darken($clr-brewery, $place-color-darken-text);
+}
+.clr-cottage {
+  background-color: mix(white, $clr-cottage, $place-color-white-factor);
+  color: darken($clr-cottage, $place-color-darken-text);
+}
+.clr-guardhouse {
+  background-color: mix(white, $clr-guardhouse, $place-color-white-factor);
+  color: darken($clr-guardhouse, $place-color-darken-text);
+}
+.clr-barracks {
+  background-color: mix(white, $clr-barracks, $place-color-white-factor);
+  color: darken($clr-barracks, $place-color-darken-text);
+}
+.clr-inn {
+  background-color: mix(white, $clr-inn, $place-color-white-factor);
+  color: darken($clr-inn, $place-color-darken-text);
+}
+.clr-castle {
+  background-color: mix(white, $clr-castle, $place-color-white-factor);
+  color: darken($clr-castle, $place-color-darken-text);
+}
+
+@mixin container {
+  background-color: $clr-container-background;
+  border-radius: 10px;
+  padding: 15px 20px;
+  width: fit-content;
+}
+
+#cards-queue-container {
+  @include container;
+  margin: 15px;
+
+  display: flex;
+  gap: 10px;
+
+  .card-in-queue-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    .meeples-container {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+
+      .meeple {
+        background-color: $clr-meeple;
+        width: 17px;
+        height: 17px;
+        border-radius: 100vw;
+      }
+    }
+
+    .card {
+      height: 150px;
+      width: 100px;
+
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+
+      .card-place {
+        flex-grow: 1;
+
+        box-sizing: border-box;
+        padding: 15px 20px;
+        font-size: 120%;
+        border-radius: 10px;
+
+        &.selectable:hover {
+          outline: 3px solid #656565;
+          outline-offset: 3px;
+          cursor: pointer;
+        }
+      }
+    }
+  }
+}
+
+#players-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 15px;
+
+  .player-container {
+    @include container;
+
+    .name-row {
+      display: flex;
+      gap: 25px;
+
+      div:first-child {
+        font-size: 115%;
+      }
+
+      div:not(:first-child) {
+        display: flex;
+        gap: 7px;
+        align-items: center;
+        color: $clr-text-muted;
+      }
+
+      .score-icon, .meeples-icon, .infirmary-icon {
+        width: 18px;
+        height: 18px;
+        border-radius: 100vw;
+        &.score-icon {
+          background-color: #efbd10;
+        }
+        &.meeples-icon {
+          background-color: $clr-meeple;
+        }
+        &.infirmary-icon {
+          background-color: #495e49;
+        }
+      }
+    }
+
+    .places-row {
+      display: flex;
+      gap: 2px;
+      margin-top: 10px;
+
+      .place {
+        font-size: 120%;
+
+        .title-container {
+          display: flex;
+          justify-content: center;
+          margin-bottom: 3px;
+
+          .title {
+            font-size: 13px;
+            text-align: center;
+            border-radius: 100vw;
+
+            width: 20px;
+            height: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+        }
+
+        .place-card {
+          width: 40px;
+          height: 40px;
+          background-color: $clr-container-background;
+          border-radius: 18px;
+          padding: 4px;
+
+          display: flex;
+          gap: 3px;
+
+          position: relative;
+          &:not(:last-child) {
+            margin-bottom: -25px;
+          }
+          @for $i from 1 through 10 {
+            &:nth-child(#{$i}) {
+              z-index: calc(1 * $i) !important;
+            }
+          }
+
+          .place-card-place {
+            flex-grow: 1;
+            border-radius: 2px;
+            &:first-child {
+              border-top-left-radius: 13px;
+              border-bottom-left-radius: 13px;
+            }
+            &:last-child {
+              border-top-right-radius: 13px;
+              border-bottom-right-radius: 13px;
+            }
+          }
+
+          &.empty {
+            .place-card-place {
+              border: 3px dashed darken($clr-container-background, 10%);
+            }
+          }
+        }
+      }
+    }
+  }
+}

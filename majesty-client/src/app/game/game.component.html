@@ -1,1 +1,47 @@
-<p>game here</p>
+<div id="cards-queue-container">
+  <div class="card-in-queue-container" *ngFor="let card of game.cardsQueue">
+    <div class="meeples-container">
+      <div class="meeple" *ngFor="let _ of [].constructor(card.meeples+1)"></div>
+    </div>
+    <div class="card">
+      <div class="card-place" *ngFor="let place of card.card.places" [class]="'clr-' + place.toLowerCase()"
+           [class.selectable]="queueSelectable" (click)="selectCardInQueue(place)">
+        <span class="not-selectable">{{place.substring(0, 1)}}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="players-container">
+  <div class="player-container" *ngFor="let player of game.players">
+    <div class="name-row">
+      <div>{{player.name}}</div>
+      <div>
+        <div class="score-icon"></div>
+        {{player.score}}
+      </div>
+      <div>
+        <div class="meeples-icon"></div>
+        {{player.meeples}}
+      </div>
+      <div style="flex-grow: 1"></div>
+      <div>
+        <div class="infirmary-icon"></div>
+        {{player.infirmary.length}}
+      </div>
+    </div>
+    <div class="places-row">
+      <div class="place" *ngFor="let cards of cards(player)">
+        <div class="title-container">
+          <div class="title" [class]="'clr-' + cards[0].toLowerCase()">{{cards[1].length}}</div>
+        </div>
+        <div class="place-card" *ngFor="let card of cards[1]">
+          <div class="place-card-place" *ngFor="let place of card.places" [class]="'clr-' + place.toLowerCase()"></div>
+        </div>
+        <div class="place-card empty" *ngIf="cards[1].length == 0">
+          <div class="place-card-place"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
