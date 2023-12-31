@@ -27,7 +27,7 @@ export class GameComponent {
       },
       {
         name: "Player 2",
-        score: 10,
+        score: 15,
         meeples: 3,
         cards: new Map<Place, Card[]>([
           ["MILL", [{places: ["MILL"]}]],
@@ -95,6 +95,9 @@ export class GameComponent {
   };
   cards(player: Player) {
     return Array.from(player.cards.entries());
+  }
+  isLeadingPlayer(player: Player) {
+    return player == this.game.players.slice().sort((a, b) => b.score - a.score)[0];
   }
 
   queueSelectable = true;
