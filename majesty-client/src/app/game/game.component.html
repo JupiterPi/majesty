@@ -6,7 +6,7 @@
   <div class="layout-column">
 
 
-    <div class="player-container" *ngFor="let player of game.players">
+    <div class="player-container" *ngFor="let player of otherPlayers()">
       <div class="name-row">
         <div>
           <img class="crown-icon" src="assets/crown_icon.svg" *ngIf="isLeadingPlayer(player)">
@@ -42,6 +42,11 @@
     </div>
 
 
+    <div class="container" style="color: grey; height: 200px;">
+      (Game Chat)
+    </div>
+
+
   </div>
   <div class="layout-column">
 
@@ -49,7 +54,8 @@
     <div id="cards-queue-container">
       <div class="card-in-queue-container" *ngFor="let card of game.cardsQueue">
         <div class="meeples-container">
-          <div class="meeple" *ngFor="let _ of [].constructor(card.meeples+1)"></div>
+          <div class="meeple" *ngFor="let _ of [].constructor(card.meeples)"></div>
+          <div class="meeple empty" *ngIf="card.meeples == 0"></div>
         </div>
         <div class="card">
           <div class="card-place" *ngFor="let place of card.card.places" [class]="'clr-' + place.toLowerCase()"
@@ -61,13 +67,50 @@
     </div>
 
 
-    <div class="container" style="color: grey; width: 500px; height: 200px;">
-      (Self-Player Tableau)
+    <div id="self-player-container">
+      <div class="name-row">
+        <div>
+          <img class="crown-icon" src="assets/crown_icon.svg" *ngIf="isLeadingPlayer(selfPlayer())">
+          {{selfPlayer().name}}
+        </div>
+        <div>
+          <div class="score-icon"></div>
+          {{selfPlayer().score}}
+        </div>
+        <div>
+          <div class="meeples-icon"></div>
+          {{selfPlayer().meeples}}
+        </div>
+      </div>
+      <div class="places-row">
+        <div class="place" *ngFor="let cards of cards(selfPlayer())">
+          <div class="title-container">
+            <div class="title" [class]="'clr-' + cards[0].toLowerCase()">{{cards[1].length}}</div>
+          </div>
+          <div class="place-card" *ngFor="let card of cards[1]">
+            <div class="place-card-place" *ngFor="let place of card.places" [class]="'clr-' + place.toLowerCase()"></div>
+          </div>
+          <div class="place-card empty" *ngIf="cards[1].length == 0">
+            <div class="place-card-place"></div>
+          </div>
+        </div>
+        <div class="place infirmary">
+          <div class="title-container">
+            <div class="title"></div>
+          </div>
+          <div class="place-card" *ngFor="let card of selfPlayer().infirmary">
+            <div class="place-card-place" *ngFor="let place of card.places" [class]="'clr-' + place.toLowerCase()"></div>
+          </div>
+          <div class="place-card empty" *ngIf="selfPlayer().infirmary.length == 0">
+            <div class="place-card-place"></div>
+          </div>
+        </div>
+      </div>
     </div>
 
 
-    <div class="container" style="color: grey; width: 500px; height: 200px;">
-      (Game Chat)
+    <div class="container" style="color: grey; height: 200px;">
+      (Place Descriptions)
     </div>
 
 

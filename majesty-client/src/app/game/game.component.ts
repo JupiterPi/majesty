@@ -8,6 +8,7 @@ import {Card, CardInQueue, Game, Place, Player} from "../data";
 })
 export class GameComponent {
   // mock data
+  selfName = "Player 1";
   game: Game = {
     players: [
       {
@@ -23,20 +24,20 @@ export class GameComponent {
           ["INN", [{places: ["INN"]}, {places: ["INN"]}]],
           ["CASTLE", [{places: ["CASTLE"]}, {places: ["CASTLE"]}, {places: ["CASTLE"]}]],
         ]),
-        infirmary: [],
+        infirmary: [{places: ["GUARDHOUSE"]}, {places: ["GUARDHOUSE", "BARRACKS"]}, {places: ["COTTAGE"]}],
       },
       {
         name: "Player 2",
         score: 15,
         meeples: 3,
         cards: new Map<Place, Card[]>([
-          ["MILL", [{places: ["MILL"]}]],
+          ["MILL", [{places: ["MILL"]}, {places: ["MILL"]}]],
           ["BREWERY", [{places: ["BREWERY"]}, {places: ["MILL", "BREWERY"]}]],
-          ["COTTAGE", [{places: ["COTTAGE"]}, {places: ["COTTAGE"]}]],
-          ["GUARDHOUSE", [{places: ["GUARDHOUSE"]}, {places: ["GUARDHOUSE"]}]],
-          ["BARRACKS", [{places: ["BARRACKS"]}, {places: ["BARRACKS"]}]],
+          ["COTTAGE", [{places: ["COTTAGE"]}]],
+          ["GUARDHOUSE", [{places: ["GUARDHOUSE"]}, {places: ["GUARDHOUSE", "BARRACKS"]}, {places: ["GUARDHOUSE"]}]],
+          ["BARRACKS", []],
           ["INN", [{places: ["INN"]}, {places: ["INN"]}]],
-          ["CASTLE", [{places: ["CASTLE"]}, {places: ["CASTLE"]}]],
+          ["CASTLE", [{places: ["CASTLE"]}, {places: ["CASTLE"]}, {places: ["CASTLE"]}]],
         ]),
         infirmary: [],
       },
@@ -66,19 +67,19 @@ export class GameComponent {
       },
       {
         card: {
-          places: ["BREWERY"]
-        },
-        meeples: 1
-      },
-      {
-        card: {
           places: ["BARRACKS", "CASTLE"]
         },
         meeples: 1
       },
       {
         card: {
-          places: ["COTTAGE"]
+          places: ["BREWERY"]
+        },
+        meeples: 1
+      },
+      {
+        card: {
+          places: ["COTTAGE", "INN"]
         },
         meeples: 0
       },
@@ -88,26 +89,16 @@ export class GameComponent {
         },
         meeples: 0
       },
-      /*{
-        card: {
-          places: ["BARRACKS"]
-        },
-        meeples: 0
-      },
-      {
-        card: {
-          places: ["INN"]
-        },
-        meeples: 0
-      },
-      {
-        card: {
-          places: ["CASTLE"]
-        },
-        meeples: 0
-      },*/
     ]
   };
+
+  selfPlayer() {
+    return this.game.players.filter(player => player.name == this.selfName)[0];
+  }
+  otherPlayers() {
+    return this.game.players.filter(player => player.name != this.selfName);
+  }
+
   cards(player: Player) {
     return Array.from(player.cards.entries());
   }

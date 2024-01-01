@@ -62,6 +62,8 @@ $clr-castle: #9a52d5;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    width: fit-content;
+    align-items: stretch;
   }
 }
 
@@ -69,7 +71,6 @@ $clr-castle: #9a52d5;
   background-color: $clr-container-background;
   border-radius: 10px;
   padding: 15px 20px;
-  width: fit-content;
 }
 .container {
   @include container;
@@ -98,6 +99,14 @@ $clr-castle: #9a52d5;
         width: 17px;
         height: 17px;
         border-radius: 100vw;
+
+        &.empty {
+          $border-weight: 2.5px;
+          background: none;
+          width: calc(17px - 2 * $border-weight);
+          height: calc(17px - 2 * $border-weight);
+          border: $border-weight dashed darken($clr-container-background, 10%);
+        }
       }
     }
 
@@ -138,7 +147,7 @@ $clr-castle: #9a52d5;
 
 /* --- players --- */
 
-.player-container {
+.player-container, #self-player-container {
   @include container;
 
   .name-row {
@@ -212,11 +221,6 @@ $clr-castle: #9a52d5;
         &:not(:last-child) {
           margin-bottom: -25px;
         }
-        @for $i from 1 through 10 {
-          &:nth-child(#{$i}) {
-            z-index: calc(1 * $i) !important;
-          }
-        }
 
         .place-card-place {
           flex-grow: 1;
@@ -236,6 +240,40 @@ $clr-castle: #9a52d5;
             border: 3px dashed darken($clr-container-background, 10%);
           }
         }
+      }
+    }
+  }
+
+  &#self-player-container {
+    .place:not(.infirmary) {
+      .place-card {
+        width: 60px !important;
+        height: 75px !important;
+
+        &:not(:last-child) {
+          margin-bottom: -50px;
+        }
+      }
+    }
+
+    .place.infirmary {
+      .title {
+        background-color: #495e49;
+      }
+      .place-card {
+        @for $i from 1 through 12 {
+          &:nth-child(#{$i}) {
+            z-index: calc(100 - $i);
+          }
+        }
+      }
+
+      .place-card-place {
+        transition: opacity 1s ease 500ms;
+      }
+      &:not(:hover) .place-card-place {
+        opacity: 60%;
+        transition-delay: 0s;
       }
     }
   }
