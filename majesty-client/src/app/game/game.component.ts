@@ -1,5 +1,7 @@
 import {Component} from '@angular/core';
-import {Card, CardInQueue, Game, Place, Player} from "../data";
+import {Card, Game, Place, Player} from "../data";
+import {Request, SocketService} from "../socket.service";
+import {AuthService} from "../auth.service";
 
 @Component({
   selector: 'app-game',
@@ -7,107 +9,60 @@ import {Card, CardInQueue, Game, Place, Player} from "../data";
   styleUrls: ['./game.component.scss']
 })
 export class GameComponent {
-  // mock data
-  selfName = "Player 1";
-  game: Game = {
-    players: [
-      {
-        name: "Player 1",
-        score: 10,
-        meeples: 3,
-        cards: new Map<Place, Card[]>([
-          ["MILL", [{places: ["MILL"]}, {places: ["MILL"]}]],
-          ["BREWERY", [{places: ["BREWERY"]}, {places: ["MILL", "BREWERY"]}]],
-          ["COTTAGE", [{places: ["COTTAGE"]}]],
-          ["GUARDHOUSE", [{places: ["GUARDHOUSE"]}, {places: ["GUARDHOUSE", "BARRACKS"]}, {places: ["GUARDHOUSE"]}]],
-          ["BARRACKS", []],
-          ["INN", [{places: ["INN"]}, {places: ["INN"]}]],
-          ["CASTLE", [{places: ["CASTLE"]}, {places: ["CASTLE"]}, {places: ["CASTLE"]}]],
-        ]),
-        infirmary: [{places: ["GUARDHOUSE"]}, {places: ["GUARDHOUSE", "BARRACKS"]}, {places: ["COTTAGE"]}],
-      },
-      {
-        name: "Player 2",
-        score: 15,
-        meeples: 3,
-        cards: new Map<Place, Card[]>([
-          ["MILL", [{places: ["MILL"]}, {places: ["MILL"]}]],
-          ["BREWERY", [{places: ["BREWERY"]}, {places: ["MILL", "BREWERY"]}]],
-          ["COTTAGE", [{places: ["COTTAGE"]}]],
-          ["GUARDHOUSE", [{places: ["GUARDHOUSE"]}, {places: ["GUARDHOUSE", "BARRACKS"]}, {places: ["GUARDHOUSE"]}]],
-          ["BARRACKS", []],
-          ["INN", [{places: ["INN"]}, {places: ["INN"]}]],
-          ["CASTLE", [{places: ["CASTLE"]}, {places: ["CASTLE"]}, {places: ["CASTLE"]}]],
-        ]),
-        infirmary: [],
-      },
-      {
-        name: "Player 3",
-        score: 25,
-        meeples: 4,
-        cards: new Map<Place, Card[]>([
-          ["MILL", [{places: ["MILL"]}]],
-          ["BREWERY", [{places: ["BREWERY"]}, {places: ["MILL", "BREWERY"]}]],
-          ["COTTAGE", [{places: ["COTTAGE"]}, {places: ["COTTAGE"]}]],
-          ["GUARDHOUSE", [{places: ["GUARDHOUSE"]}, {places: ["GUARDHOUSE"]}]],
-          ["BARRACKS", [{places: ["BARRACKS"]}, {places: ["BARRACKS"]}]],
-          ["INN", [{places: ["INN"]}, {places: ["INN"]}]],
-          ["CASTLE", [{places: ["CASTLE"]}, {places: ["CASTLE"]}]],
-        ]),
-        infirmary: [],
-      },
-    ],
-    bSide: false,
-    cardsQueue: [
-      {
-        card: {
-          places: ["MILL"]
-        },
-        meeples: 2
-      },
-      {
-        card: {
-          places: ["BARRACKS", "CASTLE"]
-        },
-        meeples: 1
-      },
-      {
-        card: {
-          places: ["BREWERY"]
-        },
-        meeples: 1
-      },
-      {
-        card: {
-          places: ["COTTAGE", "INN"]
-        },
-        meeples: 0
-      },
-      {
-        card: {
-          places: ["GUARDHOUSE"]
-        },
-        meeples: 0
-      },
-    ]
-  };
+  game?: Game;
+
+  constructor(private socket: SocketService, private auth: AuthService) {
+    socket.onMessage("game").subscribe(game => this.game = game);
+    socket.onMessage("request").subscribe((request: Request) => {
+      this.currentRequestId = request.requestId;
+      const requestPayload = request.payload != null ? JSON.parse(request.payload) : null;
+      if (request.type == "card_from_queue") {
+        this.queueSelectable = true;
+      }
+      if (request.type == "healed_card_place") {
+        this.placesSelectable = (requestPayload as Card).places;
+      }
+    });
+  }
+  currentRequestId?: string;
+  sendResponse(payload: any) {
+    this.socket.sendMessage("request", {requestId: this.currentRequestId, payload: JSON.stringify(payload)});
+  }
 
   selfPlayer() {
-    return this.game.players.filter(player => player.name == this.selfName)[0];
+    return this.game!.players.filter(player => player.name == this.auth.playerName)[0];
   }
   otherPlayers() {
-    return this.game.players.filter(player => player.name != this.selfName);
+    return this.game!.players.filter(player => player.name != this.auth.playerName);
   }
 
   cards(player: Player) {
-    return Array.from(player.cards.entries());
+    return Object.entries(player.cards) as [Place, Card[]][];
   }
   isLeadingPlayer(player: Player) {
-    return player == this.game.players.slice().sort((a, b) => b.score - a.score)[0];
+    return player == this.game!.players.slice().sort((a, b) => b.score - a.score)[0];
   }
 
-  queueSelectable = true;
-  selectCardInQueue(place: Place) {
-    console.log("selected card in queue:", place);
+  queueSelectable = false;
+  isCardInQueueSelectable(index: number, place: Place) {
+    if (!this.queueSelectable) return false;
+    if (index != this.game!.cardsQueue.findIndex(card => card.card.places.includes(place))) return false;
+    if (index > this.selfPlayer().meeples) return false;
+    return true;
+  }
+  selectCardInQueue(index: number, place: Place) {
+    if (!this.isCardInQueueSelectable(index, place)) return;
+    this.sendResponse({place});
+    this.queueSelectable = false;
+  }
+
+  placesSelectable: Place[] = [];
+  isPlaceSelectable(place: Place) {
+    return this.placesSelectable.includes(place);
+  }
+  selectPlace(place: Place) {
+    if (!this.isPlaceSelectable(place)) return;
+    this.sendResponse({place});
+    this.placesSelectable = [];
   }
 }

@@ -15,7 +15,15 @@ export interface Player {
   name: string;
   score: number;
   meeples: number;
-  cards: Map<Place, Card[]>;
+  cards: {
+    MILL: Card[],
+    BREWERY: Card[],
+    COTTAGE: Card[],
+    GUARDHOUSE: Card[],
+    BARRACKS: Card[],
+    INN: Card[],
+    CASTLE: Card[],
+  };
   infirmary: Card[];
 }
 

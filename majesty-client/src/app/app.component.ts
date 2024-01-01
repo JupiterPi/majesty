@@ -10,8 +10,11 @@ export class AppComponent {
   started = false;
 
   constructor(socket: SocketService) {
-    socket.onMessage("game").subscribe(() => {
-      this.started = true;
+    socket.onMessage("game").subscribe(game => {
+      if (!this.started) {
+        this.started = true;
+        setTimeout(() => socket.fireOnMessage("game", game), 20);
+      }
     });
   }
 }

@@ -1,6 +1,7 @@
 package jupiterpi.majesty
 
 import jupiterpi.majesty.Game.CardInQueue
+import kotlin.math.max
 import kotlin.math.pow
 
 class Game(
@@ -62,20 +63,21 @@ class Player(val name: String) {
     var meeples = 5
 
     suspend fun runTurn() {
-        val choice = handler.requestCardFromQueue()
+        val choicePlace = handler.requestCardFromQueue()
+        val choiceCard = game.cardsQueue.first { it.card.places.contains(choicePlace) }
 
-        val meeplesSpent = game.cardsQueue.indexOf(choice.card)
+        val meeplesSpent = game.cardsQueue.indexOf(choiceCard)
         meeples -= meeplesSpent
         game.cardsQueue.take(meeplesSpent).forEach { it.meeples++ }
 
-        game.cardsQueue -= choice.card
+        game.cardsQueue -= choiceCard
         game.cardsQueue += CardInQueue(game.cardsStack.removeFirst(), 0)
 
-        cards[choice.place]!! += choice.card.card
-        meeples += choice.card.meeples
-        choice.place.applyEffect(this)
+        cards[choicePlace]!! += choiceCard.card
+        meeples += choiceCard.meeples
+        choicePlace.applyEffect(this)
 
-        val excessMeeples = meeples - 5
+        val excessMeeples = max(0, meeples - 5)
         meeples -= excessMeeples
         score += 1 * excessMeeples
     }

@@ -63,7 +63,10 @@ $clr-castle: #9a52d5;
     flex-direction: column;
     gap: 10px;
     width: fit-content;
-    align-items: stretch;
+
+    &:first-child {
+      align-items: flex-end;
+    }
   }
 }
 
@@ -71,6 +74,7 @@ $clr-castle: #9a52d5;
   background-color: $clr-container-background;
   border-radius: 10px;
   padding: 15px 20px;
+  width: fit-content;
 }
 .container {
   @include container;
@@ -188,6 +192,16 @@ $clr-castle: #9a52d5;
 
     .place {
       font-size: 120%;
+
+      &.selectable:hover {
+        cursor: pointer;
+        .title {
+          outline: 3px solid #656565;
+          outline-offset: 3px;
+          position: relative;
+          z-index: 100;
+        }
+      }
 
       .title-container {
         display: flex;

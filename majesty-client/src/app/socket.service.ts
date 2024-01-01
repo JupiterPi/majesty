@@ -2,6 +2,12 @@ import {Injectable} from "@angular/core";
 import {Observable, Subject} from "rxjs";
 import {environment} from "../environments/environment";
 
+export interface Request {
+  requestId: string;
+  type: string;
+  payload: string | null;
+}
+
 @Injectable({
   providedIn: "root"
 })
@@ -33,6 +39,9 @@ export class SocketService {
     } else {
       return subject;
     }
+  }
+  fireOnMessage(topic: string, payload: any) {
+    this.topics.get(topic)?.next(payload);
   }
 
   sendMessage(topic: string, payload: any) {
