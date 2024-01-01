@@ -1,50 +1,75 @@
-<div id="cards-queue-container">
-  <div class="card-in-queue-container" *ngFor="let card of game.cardsQueue">
-    <div class="meeples-container">
-      <div class="meeple" *ngFor="let _ of [].constructor(card.meeples+1)"></div>
-    </div>
-    <div class="card">
-      <div class="card-place" *ngFor="let place of card.card.places" [class]="'clr-' + place.toLowerCase()"
-           [class.selectable]="queueSelectable" (click)="selectCardInQueue(place)">
-        <div class="icon" [style]='"mask: url(\"assets/place_icons/" + place.toLowerCase() + ".svg\") center/contain no-repeat;"' [class]="'clr-' + place.toLowerCase()"></div>
-      </div>
-    </div>
-  </div>
+<div id="title-container">
+  <div id="title">Majesty Online</div>
 </div>
 
-<div id="players-container">
-  <div class="player-container" *ngFor="let player of game.players">
-    <div class="name-row">
-      <div>
-        <img class="crown-icon" src="assets/crown_icon.svg" *ngIf="isLeadingPlayer(player)">
-        {{player.name}}
+<div id="layout">
+  <div class="layout-column">
+
+
+    <div class="player-container" *ngFor="let player of game.players">
+      <div class="name-row">
+        <div>
+          <img class="crown-icon" src="assets/crown_icon.svg" *ngIf="isLeadingPlayer(player)">
+          {{player.name}}
+        </div>
+        <div>
+          <div class="score-icon"></div>
+          {{player.score}}
+        </div>
+        <div>
+          <div class="meeples-icon"></div>
+          {{player.meeples}}
+        </div>
+        <div style="flex-grow: 1"></div>
+        <div>
+          <div class="infirmary-icon"></div>
+          {{player.infirmary.length}}
+        </div>
       </div>
-      <div>
-        <div class="score-icon"></div>
-        {{player.score}}
-      </div>
-      <div>
-        <div class="meeples-icon"></div>
-        {{player.meeples}}
-      </div>
-      <div style="flex-grow: 1"></div>
-      <div>
-        <div class="infirmary-icon"></div>
-        {{player.infirmary.length}}
+      <div class="places-row">
+        <div class="place" *ngFor="let cards of cards(player)">
+          <div class="title-container">
+            <div class="title" [class]="'clr-' + cards[0].toLowerCase()">{{cards[1].length}}</div>
+          </div>
+          <div class="place-card" *ngFor="let card of cards[1]">
+            <div class="place-card-place" *ngFor="let place of card.places" [class]="'clr-' + place.toLowerCase()"></div>
+          </div>
+          <div class="place-card empty" *ngIf="cards[1].length == 0">
+            <div class="place-card-place"></div>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="places-row">
-      <div class="place" *ngFor="let cards of cards(player)">
-        <div class="title-container">
-          <div class="title" [class]="'clr-' + cards[0].toLowerCase()">{{cards[1].length}}</div>
+
+
+  </div>
+  <div class="layout-column">
+
+
+    <div id="cards-queue-container">
+      <div class="card-in-queue-container" *ngFor="let card of game.cardsQueue">
+        <div class="meeples-container">
+          <div class="meeple" *ngFor="let _ of [].constructor(card.meeples+1)"></div>
         </div>
-        <div class="place-card" *ngFor="let card of cards[1]">
-          <div class="place-card-place" *ngFor="let place of card.places" [class]="'clr-' + place.toLowerCase()"></div>
-        </div>
-        <div class="place-card empty" *ngIf="cards[1].length == 0">
-          <div class="place-card-place"></div>
+        <div class="card">
+          <div class="card-place" *ngFor="let place of card.card.places" [class]="'clr-' + place.toLowerCase()"
+               [class.selectable]="queueSelectable" (click)="selectCardInQueue(place)">
+            <div class="icon" [style]='"mask: url(\"assets/place_icons/" + place.toLowerCase() + ".svg\") center/contain no-repeat;"' [class]="'clr-' + place.toLowerCase()"></div>
+          </div>
         </div>
       </div>
     </div>
+
+
+    <div class="container" style="color: grey; width: 500px; height: 200px;">
+      (Self-Player Tableau)
+    </div>
+
+
+    <div class="container" style="color: grey; width: 500px; height: 200px;">
+      (Game Chat)
+    </div>
+
+
   </div>
 </div>

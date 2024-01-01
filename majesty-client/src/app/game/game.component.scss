@@ -41,16 +41,44 @@ $clr-castle: #9a52d5;
   color: darken($clr-castle, $place-color-darken-text);
 }
 
+/* --- (layout) --- */
+
+#title-container {
+  display: flex;
+  justify-content: center;
+  margin: 30px 0 10px 0;
+
+  #title {
+    font-size: 180%;
+  }
+}
+
+#layout {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+
+  .layout-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
 @mixin container {
   background-color: $clr-container-background;
   border-radius: 10px;
   padding: 15px 20px;
   width: fit-content;
 }
+.container {
+  @include container;
+}
+
+/* --- cards queue --- */
 
 #cards-queue-container {
   @include container;
-  margin: 15px;
 
   display: flex;
   gap: 10px;
@@ -108,109 +136,104 @@ $clr-castle: #9a52d5;
   }
 }
 
-#players-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 15px;
+/* --- players --- */
 
-  .player-container {
-    @include container;
+.player-container {
+  @include container;
 
-    .name-row {
-      display: flex;
-      gap: 25px;
+  .name-row {
+    display: flex;
+    gap: 25px;
 
-      div:first-child {
-        font-size: 115%;
-      }
-
-      div:not(:first-child) {
-        display: flex;
-        gap: 7px;
-        align-items: center;
-        color: $clr-text-muted;
-      }
-
-      .score-icon, .meeples-icon, .infirmary-icon {
-        width: 18px;
-        height: 18px;
-        border-radius: 100vw;
-        &.score-icon {
-          background-color: #efbd10;
-        }
-        &.meeples-icon {
-          background-color: $clr-meeple;
-        }
-        &.infirmary-icon {
-          background-color: #495e49;
-        }
-      }
+    div:first-child {
+      font-size: 115%;
     }
 
-    .places-row {
+    div:not(:first-child) {
       display: flex;
-      gap: 2px;
-      margin-top: 10px;
+      gap: 7px;
+      align-items: center;
+      color: $clr-text-muted;
+    }
 
-      .place {
-        font-size: 120%;
+    .score-icon, .meeples-icon, .infirmary-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 100vw;
+      &.score-icon {
+        background-color: #efbd10;
+      }
+      &.meeples-icon {
+        background-color: $clr-meeple;
+      }
+      &.infirmary-icon {
+        background-color: #495e49;
+      }
+    }
+  }
 
-        .title-container {
+  .places-row {
+    display: flex;
+    gap: 2px;
+    margin-top: 10px;
+
+    .place {
+      font-size: 120%;
+
+      .title-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 3px;
+
+        .title {
+          font-size: 13px;
+          text-align: center;
+          border-radius: 100vw;
+
+          width: 20px;
+          height: 20px;
           display: flex;
           justify-content: center;
-          margin-bottom: 3px;
+          align-items: center;
+        }
+      }
 
-          .title {
-            font-size: 13px;
-            text-align: center;
-            border-radius: 100vw;
+      .place-card {
+        width: 40px;
+        height: 40px;
+        background-color: $clr-container-background;
+        border-radius: 18px;
+        padding: 4px;
 
-            width: 20px;
-            height: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        display: flex;
+        gap: 3px;
+
+        position: relative;
+        &:not(:last-child) {
+          margin-bottom: -25px;
+        }
+        @for $i from 1 through 10 {
+          &:nth-child(#{$i}) {
+            z-index: calc(1 * $i) !important;
           }
         }
 
-        .place-card {
-          width: 40px;
-          height: 40px;
-          background-color: $clr-container-background;
-          border-radius: 18px;
-          padding: 4px;
-
-          display: flex;
-          gap: 3px;
-
-          position: relative;
-          &:not(:last-child) {
-            margin-bottom: -25px;
+        .place-card-place {
+          flex-grow: 1;
+          border-radius: 2px;
+          &:first-child {
+            border-top-left-radius: 13px;
+            border-bottom-left-radius: 13px;
           }
-          @for $i from 1 through 10 {
-            &:nth-child(#{$i}) {
-              z-index: calc(1 * $i) !important;
-            }
+          &:last-child {
+            border-top-right-radius: 13px;
+            border-bottom-right-radius: 13px;
           }
+        }
 
+        &.empty {
           .place-card-place {
-            flex-grow: 1;
-            border-radius: 2px;
-            &:first-child {
-              border-top-left-radius: 13px;
-              border-bottom-left-radius: 13px;
-            }
-            &:last-child {
-              border-top-right-radius: 13px;
-              border-bottom-right-radius: 13px;
-            }
-          }
-
-          &.empty {
-            .place-card-place {
-              border: 3px dashed darken($clr-container-background, 10%);
-            }
+            border: 3px dashed darken($clr-container-background, 10%);
           }
         }
       }

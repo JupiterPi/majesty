@@ -40,6 +40,21 @@ export class GameComponent {
         ]),
         infirmary: [],
       },
+      {
+        name: "Player 3",
+        score: 25,
+        meeples: 4,
+        cards: new Map<Place, Card[]>([
+          ["MILL", [{places: ["MILL"]}]],
+          ["BREWERY", [{places: ["BREWERY"]}, {places: ["MILL", "BREWERY"]}]],
+          ["COTTAGE", [{places: ["COTTAGE"]}, {places: ["COTTAGE"]}]],
+          ["GUARDHOUSE", [{places: ["GUARDHOUSE"]}, {places: ["GUARDHOUSE"]}]],
+          ["BARRACKS", [{places: ["BARRACKS"]}, {places: ["BARRACKS"]}]],
+          ["INN", [{places: ["INN"]}, {places: ["INN"]}]],
+          ["CASTLE", [{places: ["CASTLE"]}, {places: ["CASTLE"]}]],
+        ]),
+        infirmary: [],
+      },
     ],
     bSide: false,
     cardsQueue: [
@@ -73,7 +88,7 @@ export class GameComponent {
         },
         meeples: 0
       },
-      {
+      /*{
         card: {
           places: ["BARRACKS"]
         },
@@ -90,7 +105,7 @@ export class GameComponent {
           places: ["CASTLE"]
         },
         meeples: 0
-      },
+      },*/
     ]
   };
   cards(player: Player) {
