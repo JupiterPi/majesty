@@ -66,12 +66,14 @@ class PlayerSocketHandler(
 ) : PlayerHandler {
     override suspend fun refreshGameState() = sendPacket("game", GameDTO(player.game))
 
-    override suspend fun requestCardFromQueue(): PlayerHandler.CardChoice {
-        @Serializable data class CardChoiceDTO(val cardIndex: Int, val place: Place)
-        val response = request<CardChoiceDTO>("card_from_queue")
-        return PlayerHandler.CardChoice(player.game.cardsQueue[response.cardIndex], response.place)
+    override suspend fun requestCardFromQueue(): Place {
+        @Serializable data class CardChoiceDTO(val place: Place)
+        return request<CardChoiceDTO>("card_from_queue").place
     }
-    override suspend fun requestHealedCardPlace(card: Card): Place = request("healed_card_place", CardDTO(card))
+    override suspend fun requestHealedCardPlace(card: Card): Place {
+        @Serializable data class HealedCardPlaceDTO(val place: Place)
+        return request<CardDTO, HealedCardPlaceDTO>("healed_card_place", CardDTO(card)).place
+    }
 
     override suspend fun requestBuySellMeeples(): Int {
         @Serializable data class BuySellMeeplesDTO(val buySellMeeples: Int)
@@ -90,7 +92,9 @@ class PlayerSocketHandler(
     suspend fun runResponseLoop() {
         @Serializable data class SocketResponse(val requestId: String, val payload: String)
         while (true) {
-            val response = session.receiveDeserialized<SocketResponse>()
+            val packet = session.receiveDeserialized<Packet<SocketResponse>>()
+            if (packet.topic != "request") continue
+            val response = packet.payload
             responses[response.requestId] = response.payload
         }
     }

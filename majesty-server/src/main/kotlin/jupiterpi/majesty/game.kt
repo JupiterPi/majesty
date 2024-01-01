@@ -116,12 +116,12 @@ enum class Place(
     }, 8),
     BARRACKS({ player ->
         player.game.players.filter { it != player }.forEach {
-            if (it.cards[GUARDHOUSE]!!.size < player.cards[BARRACKS]!!.size + 1) it.injureCard()
+            if (it.cards[GUARDHOUSE]!!.size < player.cards[BARRACKS]!!.size) it.injureCard()
         }
         player.score += 3 * player.cards[BARRACKS]!!.size
     }, { player ->
         player.game.players.filter { it != player }.forEach {
-            if (it.cards[GUARDHOUSE]!!.size < player.cards[BARRACKS]!!.size + 1) it.injureCard()
+            if (it.cards[GUARDHOUSE]!!.size < player.cards[BARRACKS]!!.size) it.injureCard()
         }
         player.score += 3 * (player.cards[BARRACKS]!!.size + player.cards[INN]!!.size + player.cards[CASTLE]!!.size)
     }, 8),
