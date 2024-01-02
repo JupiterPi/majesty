@@ -33,19 +33,23 @@ class Game(
             }
         }
 
-        players.forEach { player ->
-            player.score -= (if (bSide) 2 else 1) * player.infirmary.size
-            player.score += player.cards.count { it.value.isNotEmpty() }.toDouble().pow(2).toInt()
-        }
-        Place.entries.forEach { place ->
+        val infirmaryDeduction = players.associateWith { player -> ((if (bSide) -2 else -1) * player.infirmary.size).also { player.score += it } }
+        val varietyScore = players.associateWith { player -> (player.cards.count { it.value.isNotEmpty() }.toDouble().pow(2).toInt()).also { player.score += it } }
+        val maxScores = Place.entries.associateWith { place ->
             val maxCards = players.maxOf { it.cards[place]!!.size }
-            players.filter { it.cards[place]!!.size == maxCards }.forEach { it.score += place.getMaximumCardsBonus(this) }
+            players.filter { it.cards[place]!!.size == maxCards }.onEach { it.score += place.getMaximumCardsBonus(this) }
+        }
+        players.forEach { player ->
+            val finalScoringMaxCards = maxScores.filterValues { it.contains(player) }.map { FinalScoringMaxCardDTO(it.key, it.key.getMaximumCardsBonus(this)) }
+            sendNotification(player, FinalScoringNotification(varietyScore[player]!!, finalScoringMaxCards, infirmaryDeduction[player]!!))
         }
 
         val maxScore = players.maxOf { it.score }
         val results = SocketHandler.Results(winner = players.filter { it.score == maxScore })
         players.forEach { it.handler.displayResults(results) }
     }
+
+    suspend inline fun <reified T> sendNotification(player: Player, notification: T) = players.forEach { it.handler.sendNotification(player, notification) }
 }
 
 class Player(val name: String) {
@@ -56,8 +60,7 @@ class Player(val name: String) {
     val cards = mapOf(*Place.entries.map { it to mutableListOf<Card>() }.toTypedArray())
 
     val infirmary = mutableListOf<Card>()
-    fun injureCard() = cards.entries.sortedBy { it.key }.firstOrNull { it.value.isNotEmpty() }?.value?.removeFirst()
-        ?.let { infirmary.add(0, it) }
+    fun injureCard() = cards.entries.sortedBy { it.key }.firstOrNull { it.value.isNotEmpty() }?.also { it.value.removeFirst().also { infirmary.add(0, it) } }?.key
 
     var score = 0
     var meeples = 5
@@ -73,6 +76,8 @@ class Player(val name: String) {
         game.cardsQueue -= choiceCard
         game.cardsQueue += CardInQueue(game.cardsStack.removeFirst(), 0)
 
+        game.sendNotification(this, CardTakenNotification(CardDTO(choiceCard.card), meeplesSpent, choiceCard.meeples))
+
         cards[choicePlace]!! += choiceCard.card
         meeples += choiceCard.meeples
         choicePlace.applyEffect(this)
@@ -80,6 +85,7 @@ class Player(val name: String) {
         val excessMeeples = max(0, meeples - 5)
         meeples -= excessMeeples
         score += 1 * excessMeeples
+        if (excessMeeples > 0) game.sendNotification(this, MeeplesSoldNotification(excessMeeples))
     }
 }
 
@@ -88,37 +94,54 @@ enum class Place(
     private val bSideEffect: suspend (player: Player) -> Unit,
     private val bSideMaxCardsBonus: Int,
 ) {
+    //TODO bSide notifications
     MILL({ player ->
-        player.score += 2 * player.cards[MILL]!!.size
+        val score = 2 * player.cards[MILL]!!.size
+        player.score += score
+        player.game.sendNotification(player, MillPlayedNotification(score))
     }, { player ->
         player.score += 2 * player.cards[MILL]!!.size
         player.game.players.filter { it.cards[COTTAGE]!!.size >= 1 }.forEach { it.score += 3 }
     }, 14),
     BREWERY({ player ->
-        player.score += 2 * player.cards[BREWERY]!!.size
-        player.meeples += 1 * player.cards[BREWERY]!!.size
-        player.game.players.filter { it.cards[MILL]!!.size >= 1 }.forEach { it.score += 2 }
+        val score = 2 * player.cards[BREWERY]!!.size
+        val meeples = 1 * player.cards[BREWERY]!!.size
+        val benefitedPlayers = player.game.players.filter { it.cards[MILL]!!.size >= 1 }
+        player.score += score; player.meeples += meeples; benefitedPlayers.forEach { it.score += 2 }
+        player.game.sendNotification(player, BreweryPlayedNotification(score, meeples, benefitedPlayers.map { it.name }))
     }, { player ->
         player.meeples += 1 * (player.cards[MILL]!!.size + player.cards[BREWERY]!!.size)
         player.game.players.filter { it.cards[INN]!!.size >= 1 && it.cards[CASTLE]!!.size >= 1 }.forEach { it.score += 10 }
     }, 12),
     COTTAGE({ player ->
-        player.infirmary.removeFirstOrNull()?.let { player.cards[player.handler.requestHealedCardPlace(it)]!! += it }
-        player.score += 2 * (player.cards[MILL]!!.size + player.cards[BREWERY]!!.size + player.cards[COTTAGE]!!.size)
+        val healedCard = player.infirmary.removeFirstOrNull()
+        val healedCardPlace = healedCard?.let { player.handler.requestHealedCardPlace(it) }
+        if (healedCard != null) player.cards[healedCardPlace]!! += healedCard
+        val score = 2 * (player.cards[MILL]!!.size + player.cards[BREWERY]!!.size + player.cards[COTTAGE]!!.size)
+        player.score += score
+        player.game.sendNotification(player, CottagePlayedNotification(healedCardPlace, score))
     }, { player ->
         player.score += 3 * player.cards[COTTAGE]!!.size
     }, 12),
     GUARDHOUSE({ player ->
-        player.score += 2 * (player.cards[GUARDHOUSE]!!.size + player.cards[BARRACKS]!!.size + player.cards[INN]!!.size)
+        val score = 2 * (player.cards[GUARDHOUSE]!!.size + player.cards[BARRACKS]!!.size + player.cards[INN]!!.size)
+        player.score += score
+        player.game.sendNotification(player, GuardhousePlayedNotification(player.cards[GUARDHOUSE]!!.size, score))
     }, { player ->
         player.score += 2 * (player.cards[BREWERY]!!.size + player.cards[COTTAGE]!!.size + player.cards[GUARDHOUSE]!!.size)
         player.game.players.filter { it.cards[INN]!!.size >= 1 }.forEach { it.score += 3 }
     }, 8),
     BARRACKS({ player ->
-        player.game.players.filter { it != player }.forEach {
-            if (it.cards[GUARDHOUSE]!!.size < player.cards[BARRACKS]!!.size) it.injureCard()
-        }
-        player.score += 3 * player.cards[BARRACKS]!!.size
+        val attackStrength = player.cards[BARRACKS]!!.size
+        val attackedPlayers = player.game.players.filter { it != player }.map {
+            if (it.cards[GUARDHOUSE]!!.size < attackStrength) {
+                val injuredCardPlace = it.injureCard()
+                return@map if (injuredCardPlace == null) null else AttackedPlayerDTO(it.name, injuredCardPlace)
+            } else return@map null
+        }.filterNotNull()
+        val score = 3 * player.cards[BARRACKS]!!.size
+        player.score += score
+        player.game.sendNotification(player, BarracksPlayedNotification(attackStrength, attackedPlayers, score))
     }, { player ->
         player.game.players.filter { it != player }.forEach {
             if (it.cards[GUARDHOUSE]!!.size < player.cards[BARRACKS]!!.size) it.injureCard()
@@ -126,14 +149,20 @@ enum class Place(
         player.score += 3 * (player.cards[BARRACKS]!!.size + player.cards[INN]!!.size + player.cards[CASTLE]!!.size)
     }, 8),
     INN({ player ->
-        player.score += 4 * player.cards[INN]!!.size
-        player.game.players.filter { it.cards[BREWERY]!!.size >= 1 }.forEach { it.score += 3 }
+        val score = 4 * player.cards[INN]!!.size
+        val benefitedPlayers = player.game.players.filter { it.cards[BREWERY]!!.size >= 1 }
+        player.score += score
+        benefitedPlayers.forEach { it.score += 3 }
+        player.game.sendNotification(player, InnPlayedNotification(score, benefitedPlayers.map { it.name }))
     }, { player ->
         player.score += player.cards[INN]!!.size * 2 * player.cards.maxOf { it.value.size }
     }, 12),
     CASTLE({ player ->
-        player.score += 5 * player.cards[CASTLE]!!.size
-        player.meeples += 5 * player.cards[CASTLE]!!.size
+        val score = 5 * player.cards[CASTLE]!!.size
+        val meeples = 1 * player.cards[CASTLE]!!.size
+        player.score += score
+        player.meeples += meeples
+        player.game.sendNotification(player, CastlePlayedNotification(score, meeples))
     }, { player ->
         val buySellMeeples = player.handler.requestBuySellMeeples()
         player.meeples += buySellMeeples

@@ -309,6 +309,7 @@ $clr-castle: #9a52d5;
   #chat-messages-container {
     display: flex;
     flex-direction: column;
+    gap: 5px;
     overflow-y: auto;
     scroll-behavior: smooth;
 

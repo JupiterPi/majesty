@@ -53,9 +53,9 @@
         <div class="notification" *ngFor="let notification of notifications" [class.no-flex]="notification.type == 'message'">
           <span *ngIf="notification.type != 'message'">{{notification.playerName}}</span>
           <ng-container *ngIf="notification.type == 'message'">
-            <span>{{notification.playerName}}:</span> {{messageNotification(notification).message}}
+            <span>{{notification.playerName}}: </span><div style="display: inline-block; width: 5px"></div><span>{{messageNotification(notification).message}}</span>
           </ng-container>
-          <ng-container *ngIf="notification.type == 'card_taken'">
+          <ng-container *ngIf="notification.type == 'card_taken'"> <!--TODO: implement split cards-->
             nimmt <div class="place-icon" [class]="'clr-' + cardTakenNotification(notification).card.places[0].toLowerCase()"></div>
             <ng-container *ngIf="cardTakenNotification(notification).meeplesPlaced > 0">
               <div class="comma" *ngIf="cardTakenNotification(notification).meeplesGained > 0">,</div><ng-container *ngIf="cardTakenNotification(notification).meeplesGained == 0">und </ng-container>
