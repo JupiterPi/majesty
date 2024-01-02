@@ -52,8 +52,8 @@
           <ng-container *ngIf="notification.type == 'message'">
             <span>{{notification.playerName}}: </span><div style="display: inline-block; width: 5px"></div><span>{{messageNotification(notification).message}}</span>
           </ng-container>
-          <ng-container *ngIf="notification.type == 'card_taken'"> <!--TODO: implement split cards-->
-            nimmt <div class="place-icon" [class]="'clr-' + cardTakenNotification(notification).card.places[0].toLowerCase()"></div>
+          <ng-container *ngIf="notification.type == 'card_taken'">
+            nimmt <div class="split-place-icon"><div *ngFor="let place of cardTakenNotification(notification).card.places" [class]="'clr-' + place.toLowerCase()"></div></div>
             <ng-container *ngIf="cardTakenNotification(notification).meeplesPlaced > 0">
               <div class="comma" *ngIf="cardTakenNotification(notification).meeplesGained > 0">,</div><ng-container *ngIf="cardTakenNotification(notification).meeplesGained == 0">und </ng-container>
               platziert dafür <span><div class="meeples-icon"></div> {{cardTakenNotification(notification).meeplesPlaced}}</span>

@@ -362,7 +362,25 @@ $clr-castle: #9a52d5;
     .place-icon, img {
       width: $size;
       height: $size;
-      border-radius: 30%;
+      border-radius: 4px;
+    }
+    .split-place-icon {
+      width: $size;
+      height: $size;
+      display: flex;
+      gap: 1px;
+      div {
+        border-radius: 4px;
+        flex-grow: 1;
+        &:not(:first-child) {
+          border-top-left-radius: 2px;
+          border-bottom-left-radius: 2px;
+        }
+        &:not(:last-child) {
+          border-top-right-radius: 2px;
+          border-bottom-right-radius: 2px;
+        }
+      }
     }
 
     .score-icon, .meeples-icon, .infirmary-icon {
@@ -403,3 +421,4 @@ $clr-castle: #9a52d5;
     }
   }
 }
+
