@@ -8,10 +8,7 @@
 
     <div class="player-container" *ngFor="let player of otherPlayers()">
       <div class="name-row">
-        <div>
-          <img class="crown-icon" src="assets/icons/crown_icon.svg" *ngIf="isLeadingPlayer(player)">
-          {{player.name}}
-        </div>
+        <div>{{player.name}}</div>
         <div>
           <div class="score-icon"></div>
           {{player.score}}
@@ -143,10 +140,7 @@
 
     <div id="self-player-container">
       <div class="name-row">
-        <div>
-          <img class="crown-icon" src="assets/icons/crown_icon.svg" *ngIf="isLeadingPlayer(selfPlayer())">
-          {{selfPlayer().name}}
-        </div>
+        <div>{{selfPlayer().name}}</div>
         <div>
           <div class="score-icon"></div>
           {{selfPlayer().score}}
