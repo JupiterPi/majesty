@@ -24,14 +24,17 @@ class Game(
         repeat(6) { cardsQueue += CardInQueue(cardsStack.removeFirst(), 0) }
     }
 
+    var activePlayer: Player? = null
     suspend fun run() {
-        players.forEach { it.handler.refreshGameState() }
         repeat(12) {
             players.forEach {
+                activePlayer = it
+                refreshGameState()
                 it.runTurn()
-                players.forEach { it.handler.refreshGameState() }
             }
         }
+        activePlayer = null
+        refreshGameState()
 
         val infirmaryDeduction = players.associateWith { player -> ((if (bSide) -2 else -1) * player.infirmary.size).also { player.score += it } }
         val varietyScore = players.associateWith { player -> (player.cards.count { it.value.isNotEmpty() }.toDouble().pow(2).toInt()).also { player.score += it } }
@@ -49,6 +52,7 @@ class Game(
         sendNotification(null, GameEndNotification(winners.map { it.name }))
     }
 
+    suspend fun refreshGameState() = players.forEach { it.handler.refreshGameState() }
     suspend inline fun <reified T> sendNotification(player: Player?, notification: T) = players.forEach { it.handler.sendNotification(player, notification) }
 }
 

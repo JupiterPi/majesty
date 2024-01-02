@@ -1,6 +1,7 @@
 export interface Game {
   players: Player[];
   bSide: boolean;
+  activePlayerName: string | null;
   cardsQueue: CardInQueue[];
 }
 
@@ -69,4 +70,8 @@ export function meeplesSoldNotification(notification: Notification) {
 }
 export function finalScoringNotification(notification: Notification) {
   return notification.notification as {varietyScore: number, maxCards: {place: Place, score: number}[], infirmaryScore: number};
+}
+
+export interface GameEndNotification {
+  winnerNames: string[];
 }

@@ -50,6 +50,27 @@ $clr-castle: #9a52d5;
 
   #title {
     font-size: 180%;
+
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .state {
+    font-size: 18px;
+    color: $clr-text-muted;
+    background: $clr-container-background;
+    border-radius: 100vw;
+    padding: 5px 10px;
+
+    span:not(.comma) {
+      color: initial;
+    }
+
+    border: 3px solid $clr-container-background;
+    &.prompt {
+      border-color: black;
+    }
   }
 }
 
@@ -78,6 +99,11 @@ $clr-castle: #9a52d5;
 .container {
   @include container;
   width: fit-content;
+}
+
+.active-container {
+  outline: 2px solid #dddddd;
+  outline-offset: -2px;
 }
 
 /* --- cards queue --- */
@@ -195,13 +221,16 @@ $clr-castle: #9a52d5;
     .place {
       font-size: 120%;
 
-      &.selectable:hover {
+      &.selectable {
         cursor: pointer;
         .title {
-          outline: 3px solid #656565;
+          outline: 3px solid #b7b7b7;
           outline-offset: 3px;
           position: relative;
           z-index: 100;
+        }
+        &:hover .title {
+          outline-color: #656565;
         }
       }
 

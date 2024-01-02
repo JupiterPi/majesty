@@ -7,7 +7,7 @@ import {
   castlePlayedNotification,
   cottagePlayedNotification,
   finalScoringNotification,
-  Game,
+  Game, GameEndNotification,
   guardhousePlayedNotification,
   innPlayedNotification,
   meeplesSoldNotification,
@@ -28,6 +28,7 @@ import {AuthService} from "../auth.service";
 export class GameComponent {
   game?: Game;
   notifications: Notification[] = [];
+  gameEndNotification?: GameEndNotification;
 
   @ViewChild("chatMessagesContainer") chatMessagesContainer!: ElementRef<HTMLDivElement>;
 
@@ -44,10 +45,14 @@ export class GameComponent {
       }
     });
     socket.onMessage("notification").subscribe((notification: Notification) => {
-      this.notifications.push(notification);
-      setTimeout(() => {
-        this.chatMessagesContainer.nativeElement.scrollTop = this.chatMessagesContainer.nativeElement.scrollHeight;
-      }, 100);
+      if (notification.type == "game_end") {
+        this.gameEndNotification = notification.notification as GameEndNotification;
+      } else {
+        this.notifications.push(notification);
+        setTimeout(() => {
+          this.chatMessagesContainer.nativeElement.scrollTop = this.chatMessagesContainer.nativeElement.scrollHeight;
+        }, 100);
+      }
     });
   }
   currentRequestId?: string;

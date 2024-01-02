@@ -1,12 +1,22 @@
 <div id="title-container">
-  <div id="title">Majesty Online</div>
+  <div id="title">
+    Majesty Online
+    <div class="state" *ngIf="game?.activePlayerName != null && game!.activePlayerName != selfPlayer().name"><span>{{game!.activePlayerName}}</span> ist dran</div>
+    <div class="state prompt" *ngIf="queueSelectable"><span>Du</span> bist dran</div>
+    <div class="state prompt" *ngIf="placesSelectable.length > 0">Wähle einen Platz für die geheilte Karte!</div>
+    <div class="state prompt" *ngIf="gameEndNotification != undefined">
+      Spielende:
+      <ng-container *ngFor="let name of gameEndNotification!.winnerNames; let isLast = last"><span>{{name}}</span><span class="comma" *ngIf="!isLast">, </span></ng-container>
+      gewinnt!
+    </div>
+  </div>
 </div>
 
 <div id="layout" *ngIf="game != undefined">
   <div class="layout-column">
 
 
-    <div class="player-container" *ngFor="let player of otherPlayers()">
+    <div class="player-container" *ngFor="let player of otherPlayers()" [class.active-container]="game!.activePlayerName == player.name">
       <div class="name-row">
         <div>{{player.name}}</div>
         <div>
@@ -122,7 +132,7 @@
   <div class="layout-column">
 
 
-    <div id="cards-queue-container">
+    <div id="cards-queue-container" [class.active-container]="queueSelectable">
       <div class="card-in-queue-container" *ngFor="let card of game!.cardsQueue; index as cardIndex">
         <div class="meeples-container">
           <div class="meeple" *ngFor="let _ of [].constructor(card.meeples)"></div>
@@ -138,7 +148,7 @@
     </div>
 
 
-    <div id="self-player-container">
+    <div id="self-player-container" [class.active-container]="placesSelectable.length > 0">
       <div class="name-row">
         <div>{{selfPlayer().name}}</div>
         <div>

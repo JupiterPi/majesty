@@ -6,9 +6,10 @@ import kotlinx.serialization.Serializable
 data class GameDTO(
     val players: List<PlayerDTO>,
     val bSide: Boolean,
+    val activePlayerName: String?,
     val cardsQueue: List<CardInQueueDTO>,
 ) {
-    constructor(game: Game) : this(game.players.map { PlayerDTO(it) }, game.bSide, game.cardsQueue.map { CardInQueueDTO(it) })
+    constructor(game: Game) : this(game.players.map { PlayerDTO(it) }, game.bSide, game.activePlayer?.name, game.cardsQueue.map { CardInQueueDTO(it) })
 }
 
 @Serializable
