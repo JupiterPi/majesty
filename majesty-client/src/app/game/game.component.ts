@@ -43,7 +43,7 @@ export class GameComponent {
         this.placesSelectable = (requestPayload as Card).places;
       }
     });
-    socket.onMessage("notifications").subscribe((notification: Notification) => {
+    socket.onMessage("notification").subscribe((notification: Notification) => {
       this.notifications.push(notification);
       setTimeout(() => {
         this.chatMessagesContainer.nativeElement.scrollTop = this.chatMessagesContainer.nativeElement.scrollHeight;

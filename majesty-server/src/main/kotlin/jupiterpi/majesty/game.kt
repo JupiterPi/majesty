@@ -45,16 +45,16 @@ class Game(
         }
 
         val maxScore = players.maxOf { it.score }
-        val results = SocketHandler.Results(winner = players.filter { it.score == maxScore })
-        players.forEach { it.handler.displayResults(results) }
+        val winners = players.filter { it.score == maxScore }
+        sendNotification(null, GameEndNotification(winners.map { it.name }))
     }
 
-    suspend inline fun <reified T> sendNotification(player: Player, notification: T) = players.forEach { it.handler.sendNotification(player, notification) }
+    suspend inline fun <reified T> sendNotification(player: Player?, notification: T) = players.forEach { it.handler.sendNotification(player, notification) }
 }
 
 class Player(val name: String) {
-    lateinit var handler: SocketHandler
     lateinit var game: Game
+    val handler = SocketHandler(this)
     val gameHasStarted get() = ::game.isInitialized
 
     val cards = mapOf(*Place.entries.map { it to mutableListOf<Card>() }.toTypedArray())

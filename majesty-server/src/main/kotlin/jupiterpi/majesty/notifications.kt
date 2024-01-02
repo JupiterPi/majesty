@@ -83,3 +83,9 @@ data class FinalScoringNotification(
     val infirmaryScore: Int,
 )
 @Serializable data class FinalScoringMaxCardDTO(val place: Place, val score: Int)
+
+@Serializable
+@Notification("game_end")
+data class GameEndNotification(
+    val winnerNames: List<String>,
+)
