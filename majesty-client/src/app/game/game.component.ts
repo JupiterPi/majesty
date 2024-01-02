@@ -1,5 +1,22 @@
-import {Component} from '@angular/core';
-import {Card, Game, Place, Player} from "../data";
+import {Component, ElementRef, ViewChild} from '@angular/core';
+import {
+  barracksPlayedNotification,
+  breweryPlayedNotification,
+  Card,
+  cardTakenNotification,
+  castlePlayedNotification,
+  cottagePlayedNotification,
+  finalScoringNotification,
+  Game,
+  guardhousePlayedNotification,
+  innPlayedNotification,
+  meeplesSoldNotification,
+  messageNotification,
+  millPlayedNotification,
+  Notification,
+  Place,
+  Player
+} from "../data";
 import {Request, SocketService} from "../socket.service";
 import {AuthService} from "../auth.service";
 
@@ -10,6 +27,9 @@ import {AuthService} from "../auth.service";
 })
 export class GameComponent {
   game?: Game;
+  notifications: Notification[] = [];
+
+  @ViewChild("chatMessagesContainer") chatMessagesContainer!: ElementRef<HTMLDivElement>;
 
   constructor(private socket: SocketService, private auth: AuthService) {
     socket.onMessage("game").subscribe(game => this.game = game);
@@ -22,6 +42,12 @@ export class GameComponent {
       if (request.type == "healed_card_place") {
         this.placesSelectable = (requestPayload as Card).places;
       }
+    });
+    socket.onMessage("notifications").subscribe((notification: Notification) => {
+      this.notifications.push(notification);
+      setTimeout(() => {
+        this.chatMessagesContainer.nativeElement.scrollTop = this.chatMessagesContainer.nativeElement.scrollHeight;
+      }, 100);
     });
   }
   currentRequestId?: string;
@@ -65,4 +91,23 @@ export class GameComponent {
     this.sendResponse({place});
     this.placesSelectable = [];
   }
+
+  chatInput = "";
+  sendChatMessage() {
+    if (this.chatInput == "") return;
+    this.socket.sendMessage("chat", {message: this.chatInput});
+    this.chatInput = "";
+  }
+
+  protected readonly messageNotification = messageNotification;
+  protected readonly millPlayedNotification = millPlayedNotification;
+  protected readonly breweryPlayedNotification = breweryPlayedNotification;
+  protected readonly cottagePlayedNotification = cottagePlayedNotification;
+  protected readonly guardhousePlayedNotification = guardhousePlayedNotification;
+  protected readonly barracksPlayedNotification = barracksPlayedNotification;
+  protected readonly innPlayedNotification = innPlayedNotification;
+  protected readonly castlePlayedNotification = castlePlayedNotification;
+  protected readonly cardTakenNotification = cardTakenNotification;
+  protected readonly meeplesSoldNotification = meeplesSoldNotification;
+  protected readonly finalScoringNotification = finalScoringNotification;
 }

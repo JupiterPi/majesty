@@ -6,11 +6,13 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
+import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import java.util.*
+import kotlin.reflect.full.findAnnotation
 
 class Lobby(val gameId: String) {
     val players = mutableListOf<Player>()
@@ -50,7 +52,7 @@ fun Application.configureController() {
                 val player = (games[call.parameters["id"]!!]?.players ?: lobbies.single { it.gameId == call.parameters["id"]!! }.players)
                     .single { it.name == call.parameters["player"]!! }
 
-                val handler = PlayerSocketHandler(player, this)
+                val handler = SocketHandler(player, this)
                 player.handler = handler
 
                 if (player.gameHasStarted) handler.refreshGameState()
@@ -60,27 +62,33 @@ fun Application.configureController() {
     }
 }
 
-class PlayerSocketHandler(
-    private val player: Player,
-    private val session: DefaultWebSocketServerSession,
-) : PlayerHandler {
-    override suspend fun refreshGameState() = sendPacket("game", GameDTO(player.game))
+class SocketHandler(
+    val player: Player,
+    val session: DefaultWebSocketServerSession,
+) {
+    suspend fun refreshGameState() = sendPacket("game", GameDTO(player.game))
 
-    override suspend fun requestCardFromQueue(): Place {
+    @Serializable data class NotificationDTO<T>(val type: String, val playerName: String, val notification: T)
+    suspend inline fun <reified T> sendNotification(player: Player, notification: T) {
+        val dto = NotificationDTO(T::class.findAnnotation<Notification>()!!.type, player.name, notification)
+        sendPacket("notifications", dto)
+    }
+
+    suspend fun requestCardFromQueue(): Place {
         @Serializable data class CardChoiceDTO(val place: Place)
         return request<CardChoiceDTO>("card_from_queue").place
     }
-    override suspend fun requestHealedCardPlace(card: Card): Place {
+    suspend fun requestHealedCardPlace(card: Card): Place {
         @Serializable data class HealedCardPlaceDTO(val place: Place)
         return request<CardDTO, HealedCardPlaceDTO>("healed_card_place", CardDTO(card)).place
     }
-
-    override suspend fun requestBuySellMeeples(): Int {
+    suspend fun requestBuySellMeeples(): Int {
         @Serializable data class BuySellMeeplesDTO(val buySellMeeples: Int)
         return request<BuySellMeeplesDTO>("buy_sell_meeples").buySellMeeples
     }
 
-    override suspend fun displayResults(results: PlayerHandler.Results) {
+    data class Results(val winner: List<Player>)
+    suspend fun displayResults(results: Results) {
         @Serializable data class ResultsDTO(val winner: List<String>)
         sendPacket("results", ResultsDTO(results.winner.map { it.name }))
     }
@@ -90,12 +98,27 @@ class PlayerSocketHandler(
     private val responses = mutableMapOf<String, String>()
 
     suspend fun runResponseLoop() {
-        @Serializable data class SocketResponse(val requestId: String, val payload: String)
-        while (true) {
-            val packet = session.receiveDeserialized<Packet<SocketResponse>>()
-            if (packet.topic != "request") continue
-            val response = packet.payload
-            responses[response.requestId] = response.payload
+        try {
+            while (true) {
+                @Serializable data class InPacket(val topic: String, val payload: String)
+                val packet = session.receiveDeserialized<InPacket>()
+                when (packet.topic) {
+                    "request" -> {
+                        @Serializable data class SocketResponse(val requestId: String, val payload: String)
+                        val response = serialization.decodeFromString<SocketResponse>(packet.payload)
+                        responses[response.requestId] = response.payload
+                    }
+                    "chat" -> {
+                        @Serializable data class ChatMessageDTO(val message: String)
+                        val message = serialization.decodeFromString<ChatMessageDTO>(packet.payload)
+                        player.game.players.forEach {
+                            it.handler.sendNotification(player, MessageNotification(message.message))
+                        }
+                    }
+                }
+            }
+        } catch (e: ClosedReceiveChannelException) {
+            //player.handler = null
         }
     }
 
@@ -117,6 +140,6 @@ class PlayerSocketHandler(
         }
     }
 
-    @Serializable private data class Packet<T>(val topic: String, val payload: T)
-    private suspend inline fun <reified T> sendPacket(topic: String, payload: T) = session.sendSerialized(Packet(topic, payload))
+    @Serializable data class OutPacket<T>(val topic: String, val payload: T)
+    suspend inline fun <reified T> sendPacket(topic: String, payload: T) = session.sendSerialized(OutPacket(topic, payload))
 }

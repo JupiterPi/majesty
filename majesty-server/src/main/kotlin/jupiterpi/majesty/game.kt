@@ -43,13 +43,13 @@ class Game(
         }
 
         val maxScore = players.maxOf { it.score }
-        val results = PlayerHandler.Results(winner = players.filter { it.score == maxScore })
+        val results = SocketHandler.Results(winner = players.filter { it.score == maxScore })
         players.forEach { it.handler.displayResults(results) }
     }
 }
 
 class Player(val name: String) {
-    lateinit var handler: PlayerHandler
+    lateinit var handler: SocketHandler
     lateinit var game: Game
     val gameHasStarted get() = ::game.isInitialized
 

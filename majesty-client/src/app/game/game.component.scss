@@ -65,7 +65,7 @@ $clr-castle: #9a52d5;
     width: fit-content;
 
     &:first-child {
-      align-items: flex-end;
+      align-items: stretch;
     }
   }
 }
@@ -74,16 +74,17 @@ $clr-castle: #9a52d5;
   background-color: $clr-container-background;
   border-radius: 10px;
   padding: 15px 20px;
-  width: fit-content;
 }
 .container {
   @include container;
+  width: fit-content;
 }
 
 /* --- cards queue --- */
 
 #cards-queue-container {
   @include container;
+  width: fit-content;
 
   display: flex;
   gap: 10px;
@@ -153,6 +154,7 @@ $clr-castle: #9a52d5;
 
 .player-container, #self-player-container {
   @include container;
+  width: fit-content;
 
   .name-row {
     display: flex;
@@ -288,6 +290,114 @@ $clr-castle: #9a52d5;
       &:not(:hover) .place-card-place {
         opacity: 60%;
         transition-delay: 0s;
+      }
+    }
+  }
+}
+
+/* --- chat --- */
+
+#chat-container {
+  @include container;
+  width: 348px;
+  height: 430px;
+
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 10px;
+
+  #chat-messages-container {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+
+    &::-webkit-scrollbar {
+      width: 7px;
+    }
+    &::-webkit-scrollbar-track {
+      background: darken($clr-container-background, 5%);
+      border-radius: 100vw;
+    }
+    &:not(:hover)::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: darken($clr-container-background, 10%);
+      border-radius: 100vw;
+      &:hover {
+        background-color: darken($clr-container-background, 15%);
+      }
+    }
+    &:not(:hover)::-webkit-scrollbar-thumb {
+      background: transparent;
+    }
+  }
+
+  .notification {
+    font-size: 15px;
+    $size: 16px;
+    color: $clr-text-muted;
+
+    &:not(.no-flex) {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 5px;
+      row-gap: 0;
+    }
+
+    .comma {
+      margin-left: -4px;
+    }
+
+    span {
+      color: darken($clr-text-muted, 30%);
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .place-icon, img {
+      width: $size;
+      height: $size;
+      border-radius: 30%;
+    }
+
+    .score-icon, .meeples-icon, .infirmary-icon {
+      width: $size;
+      height: $size;
+      border-radius: 100vw;
+      &.score-icon {
+        background-color: #efbd10;
+      }
+      &.meeples-icon {
+        background-color: $clr-meeple;
+      }
+      &.infirmary-icon {
+        background-color: #495e49;
+      }
+    }
+  }
+
+  #chat-input {
+    display: flex;
+    gap: 10px;
+
+    input {
+      flex-grow: 1;
+    }
+
+    button {
+      width: 34px;
+      height: 34px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      img {
+        position: relative;
+        left: 1px;
       }
     }
   }

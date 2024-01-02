@@ -45,7 +45,7 @@ export class SocketService {
   }
 
   sendMessage(topic: string, payload: any) {
-    const message = JSON.stringify({topic, payload});
+    const message = JSON.stringify({topic, payload: JSON.stringify(payload)});
     this.ws!.send(message);
   }
 }

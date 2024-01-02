@@ -9,7 +9,7 @@
     <div class="player-container" *ngFor="let player of otherPlayers()">
       <div class="name-row">
         <div>
-          <img class="crown-icon" src="assets/crown_icon.svg" *ngIf="isLeadingPlayer(player)">
+          <img class="crown-icon" src="assets/icons/crown_icon.svg" *ngIf="isLeadingPlayer(player)">
           {{player.name}}
         </div>
         <div>
@@ -42,8 +42,82 @@
     </div>
 
 
-    <div class="container" style="color: grey; width: 400px; height: 200px;">
-      (Game Chat)
+    <div id="chat-container">
+      <div id="chat-input">
+        <input [(ngModel)]="chatInput" (keydown.enter)="sendChatMessage()">
+        <button (click)="sendChatMessage()" [disabled]="chatInput == ''">
+          <img src="assets/icons/send_icon.svg">
+        </button>
+      </div>
+      <div id="chat-messages-container" #chatMessagesContainer>
+        <div class="notification" *ngFor="let notification of notifications" [class.no-flex]="notification.type == 'message'">
+          <span *ngIf="notification.type != 'message'">{{notification.playerName}}</span>
+          <ng-container *ngIf="notification.type == 'message'">
+            <span>{{notification.playerName}}:</span> {{messageNotification(notification).message}}
+          </ng-container>
+          <ng-container *ngIf="notification.type == 'card_taken'">
+            nimmt <div class="place-icon" [class]="'clr-' + cardTakenNotification(notification).card.places[0].toLowerCase()"></div>
+            <ng-container *ngIf="cardTakenNotification(notification).meeplesPlaced > 0">
+              <div class="comma" *ngIf="cardTakenNotification(notification).meeplesGained > 0">,</div><ng-container *ngIf="cardTakenNotification(notification).meeplesGained == 0">und </ng-container>
+              platziert dafür <span><div class="meeples-icon"></div> {{cardTakenNotification(notification).meeplesPlaced}}</span>
+            </ng-container>
+            <ng-container *ngIf="cardTakenNotification(notification).meeplesGained > 0">
+              und erhält <span><div class="meeples-icon"></div> {{cardTakenNotification(notification).meeplesGained}}</span>
+            </ng-container>
+          </ng-container>
+          <ng-container *ngIf="notification.type == 'mill_played'"> spielt <div class="place-icon clr-mill"></div> und erhält <span><div class="score-icon"></div> {{millPlayedNotification(notification).score}}</span></ng-container>
+          <ng-container *ngIf="notification.type == 'brewery_played'">
+            spielt <div class="place-icon clr-brewery"></div>
+            und erhält <span><div class="score-icon"></div> {{breweryPlayedNotification(notification).score}}</span>
+            und <span><div class="meeples-icon"></div> {{breweryPlayedNotification(notification).meeples}}</span>
+            <div class="comma">,</div> außerdem erhält <ng-container *ngFor="let name of breweryPlayedNotification(notification).benefitedPlayerNames; let isLast = last"><span>{{name}}</span><div class="comma" *ngIf="!isLast">, </div></ng-container>
+            <ng-container *ngIf="breweryPlayedNotification(notification).benefitedPlayerNames.length == 0">niemand</ng-container>
+            <span><div class="score-icon"></div> 2</span>
+          </ng-container>
+          <ng-container *ngIf="notification.type == 'cottage_played'">
+            spielt <div class="place-icon clr-cottage"></div>
+            <ng-container *ngIf="cottagePlayedNotification(notification).healed != null"><div class="comma">,</div> heilt <div class="place-icon" [class]="'clr-' + cottagePlayedNotification(notification).healed!.toLowerCase()"></div></ng-container>
+            und erhält <span><div class="score-icon"></div> {{cottagePlayedNotification(notification).score}}</span>
+          </ng-container>
+          <ng-container *ngIf="notification.type == 'guardhouse_played'">
+            spielt <div class="place-icon clr-guardhouse"></div>
+            <div class="comma">,</div> hat jetzt <span><img src="assets/icons/defense_strength_icon.svg">{{guardhousePlayedNotification(notification).guards}}</span>
+            und erhält <div class="score-icon"></div> {{millPlayedNotification(notification).score}}
+          </ng-container>
+          <ng-container *ngIf="notification.type == 'barracks_played'">
+            spielt <div class="place-icon clr-barracks"></div>
+            <div class="comma">,</div> greift mit <span><img src="assets/icons/attack_strength_icon.svg">{{barracksPlayedNotification(notification).attackStrength}}</span>
+            <ng-container *ngFor="let attackedPlayer of barracksPlayedNotification(notification).attackedPlayers; let isLast = last"><span>{{attackedPlayer.name}}<div></div><div class="place-icon" [class]="'clr-' + attackedPlayer.place.toLowerCase()"></div></span><div class="comma" *ngIf="!isLast">, </div></ng-container>
+            <ng-container *ngIf="barracksPlayedNotification(notification).attackedPlayers.length == 0">niemand</ng-container>
+            erfolgreich an und erhält <span><div class="score-icon"></div>{{barracksPlayedNotification(notification).score}}</span>
+          </ng-container>
+          <ng-container *ngIf="notification.type == 'inn_played'">
+            spielt <div class="place-icon clr-inn"></div>
+            und erhält <span><div class="score-icon"></div> {{innPlayedNotification(notification).score}}</span>
+            <div class="comma">,</div> außerdem erhält <ng-container *ngFor="let name of innPlayedNotification(notification).benefitedPlayerNames; let isLast = last"><span>{{name}}</span><div class="comma" *ngIf="!isLast">, </div></ng-container>
+            <ng-container *ngIf="innPlayedNotification(notification).benefitedPlayerNames.length == 0">niemand</ng-container>
+            <span><div class="score-icon"></div> 3</span>
+          </ng-container>
+          <ng-container *ngIf="notification.type == 'castle_played'">
+            spielt <div class="place-icon clr-castle"></div>
+            und erhält <span><div class="score-icon"></div> {{castlePlayedNotification(notification).score}}</span>
+            und <span><div class="meeples-icon"></div>{{castlePlayedNotification(notification).meeples}}</span>
+          </ng-container>
+          <ng-container *ngIf="notification.type == 'meeples_sold'">
+            gibt überschüssige <span><div class="meeples-icon"></div> {{meeplesSoldNotification(notification).amount}}</span>
+            ab für <span><div class="score-icon"></div> {{meeplesSoldNotification(notification).amount}}</span>
+          </ng-container>
+          <ng-container *ngIf="notification.type == 'final_scoring'">
+            erhält in der Endwertung: für Variation <span><div class="score-icon"></div> {{finalScoringNotification(notification).varietyScore}}</span>
+            <div class="comma">,</div> für höchste Anzahl an Karten <ng-container *ngIf="finalScoringNotification(notification).maxCards.length == 0">nichts</ng-container>
+            <ng-container *ngFor="let maxCard of finalScoringNotification(notification).maxCards; let isLast = last"><span><div class="score-icon"></div> {{maxCard.score}}</span> durch <div class="place-icon" [class]="'clr-' + maxCard.place.toLowerCase()"></div><div class="comma" *ngIf="!isLast">, </div></ng-container>
+            <div class="comma">,</div> und
+            <ng-container *ngIf="finalScoringNotification(notification).infirmaryScore == 0">nichts</ng-container>
+            <ng-container *ngIf="finalScoringNotification(notification).infirmaryScore != 0"><span><div class="score-icon"></div> {{finalScoringNotification(notification).infirmaryScore}}</span></ng-container>
+            durch verletzte Karten
+          </ng-container>
+        </div>
+      </div>
     </div>
 
 
@@ -70,7 +144,7 @@
     <div id="self-player-container">
       <div class="name-row">
         <div>
-          <img class="crown-icon" src="assets/crown_icon.svg" *ngIf="isLeadingPlayer(selfPlayer())">
+          <img class="crown-icon" src="assets/icons/crown_icon.svg" *ngIf="isLeadingPlayer(selfPlayer())">
           {{selfPlayer().name}}
         </div>
         <div>
