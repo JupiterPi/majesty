@@ -70,9 +70,6 @@ export class GameComponent {
   cards(player: Player) {
     return Object.entries(player.cards) as [Place, Card[]][];
   }
-  isLeadingPlayer(player: Player) {
-    return player == this.game!.players.slice().sort((a, b) => b.score - a.score)[0];
-  }
 
   queueSelectable = false;
   isCardInQueueSelectable(index: number, place: Place) {

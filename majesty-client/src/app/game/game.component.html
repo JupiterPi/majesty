@@ -1,6 +1,5 @@
 <div id="title-container">
   <div id="title">
-    Majesty Online
     <div class="state" *ngIf="game?.activePlayerName != null && game!.activePlayerName != selfPlayer().name"><span>{{game!.activePlayerName}}</span> ist dran</div>
     <div class="state prompt" *ngIf="queueSelectable"><span>Du</span> bist dran</div>
     <div class="state prompt" *ngIf="placesSelectable.length > 0">Wähle einen Platz für die geheilte Karte!</div>
@@ -8,6 +7,11 @@
       Spielende:
       <ng-container *ngFor="let name of gameEndNotification!.winnerNames; let isLast = last"><span>{{name}}</span><span class="comma" *ngIf="!isLast">, </span></ng-container>
       gewinnt!
+    </div>
+    Majesty Online
+    <div class="state small">
+      <a href="https://de.wikipedia.org/wiki/Majesty_(Spiel)" target="_blank">Spiel von <span>Marc André</span></a>
+      <br><a href="https://github.com/JupiterPi/majesty" target="_blank">Online-Adaption von <span>JupiterPi</span></a>
     </div>
   </div>
 </div>
@@ -189,7 +193,7 @@
 
 
     <div class="container" style="color: grey; width: 500px; height: 200px;">
-      (Place Descriptions)
+      (Ortsbeschreibungen)
     </div>
 
 

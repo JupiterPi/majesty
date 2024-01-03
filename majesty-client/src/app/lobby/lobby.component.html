@@ -3,19 +3,20 @@
   <div id="header">Majesty Online</div>
 
   <div>
-    Player name:
+    Name:
     <input [(ngModel)]="playerName" [disabled]="joined">
   </div>
 
   <div>
-    Game ID:
+    Spiel-ID:
     <input [(ngModel)]="gameId" [disabled]="joined">
-    <button (click)="join()" [disabled]="joined">Join</button>
+    <button (click)="join()" [disabled]="joined">Beitreten</button>
   </div>
 
   <div *ngIf="joined">
-    Waiting for game to start...
+    Warten auf Spielstart...
     <img src="assets/loader.svg" style="height: 25px">
+    <button (click)="copyLink()">{{copied ? "Kopiert" : "Link kopieren"}}</button>
     <button (click)="startGame()">Start</button>
   </div>
 

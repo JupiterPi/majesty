@@ -1,5 +1,6 @@
 export const environment = {
   production: true,
-  host: "localhost:8080",
-  root: "http://localhost:8080",
+  apiHost: "localhost:8080",
+  apiRoot: "http://localhost:8080",
+  clientRoot: "http://localhost:4200",
 };

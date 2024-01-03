@@ -16,9 +16,9 @@ class Game(
     init {
         val tier1Cards = when (players.size) {
             2 -> 6; 3 -> 14; 4 -> 26
-            else -> 10/*throw Exception("Must be 2, 3, or 4 players!")*/
+            else -> throw Exception("Must be 2, 3, or 4 players!")
         }
-        cardsStack.addAll(Card.tier1Cards.take(tier1Cards).shuffled())
+        cardsStack.addAll(Card.tier1Cards.shuffled().take(tier1Cards))
         cardsStack.addAll(Card.tier2Cards.shuffled())
 
         repeat(6) { cardsQueue += CardInQueue(cardsStack.removeFirst(), 0) }

@@ -46,7 +46,7 @@ $clr-castle: #9a52d5;
 #title-container {
   display: flex;
   justify-content: center;
-  margin: 30px 0 10px 0;
+  margin: 30px 0 20px 0;
 
   #title {
     font-size: 180%;
@@ -65,6 +65,18 @@ $clr-castle: #9a52d5;
 
     span:not(.comma) {
       color: initial;
+    }
+
+    &.small {
+      font-size: 10px;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+      &:hover {
+        color: black;
+      }
     }
 
     border: 3px solid $clr-container-background;
