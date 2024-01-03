@@ -26,7 +26,6 @@ export class LobbyComponent {
   ) {
     route.queryParams.subscribe(queryParams => {
       this.gameId = queryParams["game"] ?? "";
-      console.log(this.gameId);
     });
   }
 

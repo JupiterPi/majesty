@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiHost: "localhost:8080",
-  apiRoot: "http://localhost:8080",
-  clientRoot: "http://localhost:4200",
+  apiWsRoot: "wss://majesty.jupiterpi.de",
+  apiRoot: "https://majesty.jupiterpi.de",
+  clientRoot: "https://majesty.jupiterpi.de",
 };

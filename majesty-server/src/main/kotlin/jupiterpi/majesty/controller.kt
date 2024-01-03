@@ -25,7 +25,7 @@ val games = mutableMapOf<String, Game>()
 
 fun Application.configureController() {
     routing {
-        route("game/{id}") {
+        route("api/game/{id}") {
             post("join") {
                 @Serializable
                 data class JoinGameDTO(val name: String)

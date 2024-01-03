@@ -9,10 +9,10 @@ export class ApiService {
   constructor(private http: HttpClient) {}
 
   joinGame(gameId: string, name: string) {
-    return this.http.post(`${environment.apiRoot}/game/${gameId}/join`, {name}, {responseType: "text"});
+    return this.http.post(`${environment.apiRoot}/api/game/${gameId}/join`, {name}, {responseType: "text"});
   }
 
   startGame(gameId: string) {
-    return this.http.post(`${environment.apiRoot}/game/${gameId}/start`, null, {responseType: "text"});
+    return this.http.post(`${environment.apiRoot}/api/game/${gameId}/start`, null, {responseType: "text"});
   }
 }

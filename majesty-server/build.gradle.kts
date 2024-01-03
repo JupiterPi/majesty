@@ -33,3 +33,9 @@ dependencies {
     testImplementation("io.ktor:ktor-server-tests-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }
+
+tasks.register<Exec>("deploy") {
+    dependsOn("shadowJar")
+    workingDir("$projectDir")
+    commandLine("cmd", "/c", "gcloud app deploy build\\libs\\majesty-server-all.jar --appyaml src\\main\\appengine\\app.yaml")
+}

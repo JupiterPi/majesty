@@ -16,7 +16,7 @@ export class SocketService {
   private topics = new Map<string, Subject<any>>();
 
   connect(gameId: string, player: string, onConnect: () => void) {
-    this.ws = new WebSocket(`ws://${environment.apiHost}/game/${gameId}/game/${player}`);
+    this.ws = new WebSocket(`${environment.apiWsRoot}/api/game/${gameId}/game/${player}`);
     this.ws.addEventListener("message", (message: MessageEvent) => {
       const packet = JSON.parse(message.data) as {topic: string, payload: any};
       const subject = this.topics.get(packet.topic);

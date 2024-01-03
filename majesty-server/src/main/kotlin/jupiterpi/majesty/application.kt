@@ -15,7 +15,9 @@ import kotlinx.serialization.json.Json
 import java.time.Duration
 
 fun main() {
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
+    val port = System.getenv("port")?.toInt() ?: 8080
+    val host = System.getenv("host") ?: "0.0.0.0"
+    embeddedServer(Netty, port, host, module = Application::module)
         .start(wait = true)
 }
 
