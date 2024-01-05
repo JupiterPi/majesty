@@ -78,7 +78,7 @@ class Player(val name: String) {
         game.cardsQueue.take(meeplesSpent).forEach { it.meeples++ }
 
         game.cardsQueue -= choiceCard
-        game.cardsQueue += CardInQueue(game.cardsStack.removeFirst(), 0)
+        game.cardsStack.removeFirstOrNull()?.let { game.cardsQueue += CardInQueue(it, 0) }
 
         game.sendNotification(this, CardTakenNotification(CardDTO(choiceCard.card), meeplesSpent, choiceCard.meeples))
 
