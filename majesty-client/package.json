@@ -3,9 +3,8 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "deploy": "ng build && gcloud app deploy --quiet"
+    "dev": "ng serve",
+    "build": "ng build"
   },
   "private": true,
   "dependencies": {
