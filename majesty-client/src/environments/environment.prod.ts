@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiWsRoot: "wss://majesty.jupiterpi.de",
-  apiRoot: "https://majesty.jupiterpi.de",
-  clientRoot: "https://majesty.jupiterpi.de",
+  apiWsRoot: "ws://majesty.jupiterpi.de",
+  apiRoot: "http://majesty.jupiterpi.de",
+  clientRoot: "http://majesty.jupiterpi.de",
 };
