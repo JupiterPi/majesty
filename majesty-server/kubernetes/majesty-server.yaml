@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: majesty-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: majesty-server
+  template:
+    metadata:
+      labels:
+        app: majesty-server
+    spec:
+      containers:
+        - name: majesty-server
+          image: jupiterpi/majesty-server
+          imagePullPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: majesty-server
+spec:
+  type: LoadBalancer
+  selector:
+    app: majesty-server
+  ports:
+    - port: 80
+      targetPort: 80
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: majesty-server
+spec:
+  ingressClassName: public
+  rules:
+    - host: "majesty.jupiterpi.de"
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: majesty-server
+                port:
+                  number: 80
