@@ -40,6 +40,7 @@ class Game(
         val varietyScore = players.associateWith { player -> (player.cards.count { it.value.isNotEmpty() }.toDouble().pow(2).toInt()).also { player.score += it } }
         val maxScores = Place.entries.associateWith { place ->
             val maxCards = players.maxOf { it.cards[place]!!.size }
+            if (maxCards == 0) return@associateWith listOf()
             players.filter { it.cards[place]!!.size == maxCards }.onEach { it.score += place.getMaximumCardsBonus(this) }
         }
         players.forEach { player ->
