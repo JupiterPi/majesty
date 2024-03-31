@@ -81,8 +81,10 @@
             spielt <div class="place-icon clr-brewery"></div>
             und erhält <span><div class="score-icon"></div> {{breweryPlayedNotification(notification).score}}</span>
             und <span><div class="meeples-icon"></div> {{breweryPlayedNotification(notification).meeples}}</span>
-            <div class="comma">,</div> außerdem erhält <ng-container *ngFor="let name of breweryPlayedNotification(notification).benefitedPlayerNames; let isLast = last"><span>{{name}}</span><div class="comma" *ngIf="!isLast">, </div></ng-container>
-            <ng-container *ngIf="breweryPlayedNotification(notification).benefitedPlayerNames.length == 0">niemand</ng-container>
+            <div class="comma">,</div>
+            <ng-container *ngIf="breweryPlayedNotification(notification).benefitedPlayerNames.length == 1">außerdem erhält</ng-container><ng-container *ngIf="breweryPlayedNotification(notification).benefitedPlayerNames.length > 1">außerdem erhalten</ng-container>
+            <ng-container *ngFor="let name of breweryPlayedNotification(notification).benefitedPlayerNames; let isLast = last"><span>{{name}}</span><div class="comma" *ngIf="!isLast">, </div></ng-container>
+            <ng-container *ngIf="innPlayedNotification(notification).benefitedPlayerNames.length == 0">außerdem erhält niemand</ng-container>
             <span><div class="score-icon"></div> 2</span>
           </ng-container>
           <ng-container *ngIf="notification.type == 'cottage_played'">
@@ -105,8 +107,10 @@
           <ng-container *ngIf="notification.type == 'inn_played'">
             spielt <div class="place-icon clr-inn"></div>
             und erhält <span><div class="score-icon"></div> {{innPlayedNotification(notification).score}}</span>
-            <div class="comma">,</div> außerdem erhält <ng-container *ngFor="let name of innPlayedNotification(notification).benefitedPlayerNames; let isLast = last"><span>{{name}}</span><div class="comma" *ngIf="!isLast">, </div></ng-container>
-            <ng-container *ngIf="innPlayedNotification(notification).benefitedPlayerNames.length == 0">niemand</ng-container>
+            <div class="comma">,</div>
+            <ng-container *ngIf="innPlayedNotification(notification).benefitedPlayerNames.length == 1">außerdem erhält</ng-container><ng-container *ngIf="innPlayedNotification(notification).benefitedPlayerNames.length > 1">außerdem erhalten</ng-container>
+            <ng-container *ngFor="let name of innPlayedNotification(notification).benefitedPlayerNames; let isLast = last"><span>{{name}}</span><div class="comma" *ngIf="!isLast">, </div></ng-container>
+            <ng-container *ngIf="innPlayedNotification(notification).benefitedPlayerNames.length == 0">außerdem erhält niemand</ng-container>
             <span><div class="score-icon"></div> 3</span>
           </ng-container>
           <ng-container *ngIf="notification.type == 'castle_played'">
