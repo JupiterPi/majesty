@@ -72,15 +72,12 @@ export class GameComponent {
   }
 
   queueSelectable = false;
-  isCardInQueueSelectable(index: number, place: Place) {
-    if (!this.queueSelectable) return false;
-    if (index != this.game!.cardsQueue.findIndex(card => card.card.places.includes(place))) return false;
-    if (index > this.selfPlayer().meeples) return false;
-    return true;
+  isCardInQueueSelectable(index: number) {
+    return this.queueSelectable && index <= this.selfPlayer().meeples;
   }
   selectCardInQueue(index: number, place: Place) {
-    if (!this.isCardInQueueSelectable(index, place)) return;
-    this.sendResponse({place});
+    if (!this.isCardInQueueSelectable(index)) return;
+    this.sendResponse({cardIndex: index, place});
     this.queueSelectable = false;
   }
 

@@ -148,7 +148,7 @@
         </div>
         <div class="card">
           <div class="card-place" *ngFor="let place of card.card.places" [class]="'clr-' + place.toLowerCase()"
-               [class.selectable]="isCardInQueueSelectable(cardIndex, place)" (click)="selectCardInQueue(cardIndex, place)">
+               [class.selectable]="isCardInQueueSelectable(cardIndex)" (click)="selectCardInQueue(cardIndex, place)">
             <div class="icon" [style]='"mask: url(\"assets/place_icons/" + place.toLowerCase() + ".svg\") center/contain no-repeat;"' [class]="'clr-' + place.toLowerCase()"></div>
           </div>
         </div>

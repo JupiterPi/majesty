@@ -72,9 +72,9 @@ class SocketHandler(private val player: Player) {
     }
     fun addNotification(notification: suspend () -> Unit) { notifications += notification }
 
-    suspend fun requestCardFromQueue(): Place {
-        @Serializable data class CardChoiceDTO(val place: Place)
-        return request<CardChoiceDTO>("card_from_queue").place
+    @Serializable data class CardChoiceDTO(val cardIndex: Int, val place: Place)
+    suspend fun requestCardFromQueue(): CardChoiceDTO {
+        return request<CardChoiceDTO>("card_from_queue")
     }
     suspend fun requestHealedCardPlace(card: Card): Place {
         @Serializable data class HealedCardPlaceDTO(val place: Place)

@@ -73,8 +73,8 @@ class Player(val name: String) {
     var meeples = 5
 
     suspend fun runTurn() {
-        val choicePlace = handler.requestCardFromQueue()
-        val choiceCard = game.cardsQueue.first { it.card.places.contains(choicePlace) }
+        val choice = handler.requestCardFromQueue()
+        val choiceCard = game.cardsQueue[choice.cardIndex]
 
         val meeplesSpent = game.cardsQueue.indexOf(choiceCard)
         meeples -= meeplesSpent
@@ -85,9 +85,9 @@ class Player(val name: String) {
 
         game.sendNotification(this, CardTakenNotification(CardDTO(choiceCard.card), meeplesSpent, choiceCard.meeples))
 
-        cards[choicePlace]!! += choiceCard.card
+        cards[choice.place]!! += choiceCard.card
         meeples += choiceCard.meeples
-        choicePlace.applyEffect(this)
+        choice.place.applyEffect(this)
 
         val excessMeeples = max(0, meeples - 5)
         meeples -= excessMeeples
