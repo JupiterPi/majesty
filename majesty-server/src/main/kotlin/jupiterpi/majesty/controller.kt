@@ -42,7 +42,7 @@ fun Application.configureController() {
                 val lobby = lobbies.singleOrNull { it.gameId == gameId } ?: return@post call.respondText("Lobby not found!", status = HttpStatusCode.NotFound)
                 if (lobby.players.size < 2 || lobby.players.size > 4) return@post call.respondText("Must be 2, 3, or 4 players!", status = HttpStatusCode.Forbidden)
                 lobbies -= lobby
-                val game = Game(lobby.players)
+                val game = Game(lobby.players.shuffled())
                 game.players.forEach { it.game = game }
                 games[gameId] = game
 
