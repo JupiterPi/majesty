@@ -1,3 +1,5 @@
+# kubectl create secret tls jupiterpi-de-tls -cert=***** -key=*****
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -39,6 +41,10 @@ metadata:
   name: majesty-server
 spec:
   ingressClassName: public
+  tls:
+    - hosts:
+        - majesty.jupiterpi.de
+      secretName: jupiterpi-de-tls
   rules:
     - host: "majesty.jupiterpi.de"
       http:
