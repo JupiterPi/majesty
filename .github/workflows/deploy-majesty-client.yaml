@@ -35,7 +35,7 @@ jobs:
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
-        context: .
+        context: majesty-client
         platforms: linux/amd64, linux/arm64
         push: true
         tags: jupiterpi/majesty-client:${{ env.IMAGE_TAG }}
@@ -45,7 +45,7 @@ jobs:
       with:
         find: "jupiterpi/majesty-client"
         replace: "jupiterpi/majesty-client:${{ env.IMAGE_TAG }}"
-        include: "kubernetes/**"
+        include: "majesty-client/kubernetes/**"
 
     - name: Deploy to Kubernetes
       uses: fjogeleit/http-request-action@v1
@@ -54,4 +54,4 @@ jobs:
         method: POST
         customHeaders: '{"Authorization": "Bearer ${{ secrets.KUBE_CD_TOKEN }}"}'
         contentType: text/plain
-        file: kubernetes/majesty-client.yaml
+        file: majesty-client/kubernetes/majesty-client.yaml
