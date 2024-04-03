@@ -39,12 +39,12 @@ jobs:
         push: true
         tags: jupiterpi/majesty-client:${{ env.IMAGE_TAG }}
     
-    - name: Replace tokens in Kubernetes files
-      uses: cschleiden/replace-tokens@v1
+    - name: Set image tag
+      uses: jacobtomlinson/gha-find-replace@v3
       with:
-        files: '["kubernetes/*"]'
-      env:
-        IMAGE_TAG: ${{ env.IMAGE_TAG }}
+        find: "jupiterpi/majesty-client"
+        replace: "jupiterpi/majesty-client:${{ env.IMAGE_TAG }}"
+        include: "kubernetes/**"
 
     - name: Deploy to Kubernetes
       uses: fjogeleit/http-request-action@v1
