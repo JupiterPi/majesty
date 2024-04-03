@@ -1,7 +1,7 @@
-FROM gradle:jdk21-alpine as build
+FROM gradle:jdk21 as build
 WORKDIR /app
 COPY . .
-RUN gradle shadowJar --no-daemon
+RUN gradle shadowJar
 
 FROM amazoncorretto:21-alpine
 WORKDIR /app
