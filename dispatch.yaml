@@ -1,6 +1,0 @@
-dispatch:
-
-- url: "majesty.jupiterpi.de/api/*"
-  service: default
-- url: "majesty.jupiterpi.de/*"
-  service: "majesty-client"
