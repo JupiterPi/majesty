@@ -1,0 +1,5 @@
+.idea
+build
+kubernetes
+.gitignore
+docker-compose-dev.yaml

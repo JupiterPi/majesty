@@ -1,20 +1,20 @@
-name: Deploy majesty-client
+name: Deploy majesty-server
 
 on:
   push:
     branches: [ "main" ]
     paths:
-    - majesty-client/**
+    - majesty-server/**
   pull_request:
     branches: [ "main" ]
     paths:
-    - majesty-client/**
+    - majesty-server/**
   workflow_dispatch:
 
 jobs:
 
   build_push_deploy:
-    name: Build, push and deploy majesty-client
+    name: Build, push and deploy majesty-server
     runs-on: ubuntu-latest
     env:
       IMAGE_TAG: ${{ github.run_number }}
@@ -36,23 +36,23 @@ jobs:
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
-        context: majesty-client
+        context: majesty-server
         platforms: linux/amd64, linux/arm64
         push: true
-        tags: jupiterpi/majesty-client:${{ env.IMAGE_TAG }}
+        tags: jupiterpi/majesty-server:${{ env.IMAGE_TAG }}
     
     - name: Set image tag
       uses: jacobtomlinson/gha-find-replace@v3
       with:
-        find: "jupiterpi/majesty-client"
-        replace: "jupiterpi/majesty-client:${{ env.IMAGE_TAG }}"
-        include: "majesty-client/kubernetes/**"
+        find: "jupiterpi/majesty-server"
+        replace: "jupiterpi/majesty-server:${{ env.IMAGE_TAG }}"
+        include: "majesty-server/kubernetes/**"
 
     - name: Deploy to Kubernetes
       uses: fjogeleit/http-request-action@v1
       with:
-        url: 'http://kube-cd.jupiterpi.de/applyKubernetesResource/majesty-client-githubactions/majesty-client.yaml'
+        url: 'http://kube-cd.jupiterpi.de/applyKubernetesResource/majesty-server-githubactions/majesty-server.yaml'
         method: POST
         customHeaders: '{"Authorization": "Bearer ${{ secrets.KUBE_CD_TOKEN }}"}'
         contentType: text/plain
-        file: majesty-client/kubernetes/majesty-client.yaml
+        file: majesty-server/kubernetes/majesty-server.yaml
