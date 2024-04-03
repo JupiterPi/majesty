@@ -29,6 +29,10 @@ export class LobbyComponent {
     });
   }
 
+  createGame() {
+    this.api.createGame().subscribe(id => this.gameId = id);
+  }
+
   join() {
     if (this.playerName == "" || this.gameId == "") return;
     this.cookies.put("name", this.playerName);

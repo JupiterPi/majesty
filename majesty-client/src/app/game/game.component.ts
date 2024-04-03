@@ -15,7 +15,8 @@ import {
   millPlayedNotification,
   Notification,
   Place,
-  Player
+  Player,
+  gameEndNotification,
 } from "../data";
 import {Request, SocketService} from "../socket.service";
 import {AuthService} from "../auth.service";
@@ -28,7 +29,7 @@ import {AuthService} from "../auth.service";
 export class GameComponent {
   game?: Game;
   notifications: Notification[] = [];
-  gameEndNotification?: GameEndNotification;
+  gameResult?: GameEndNotification;
 
   @ViewChild("chatMessagesContainer") chatMessagesContainer!: ElementRef<HTMLDivElement>;
 
@@ -46,13 +47,12 @@ export class GameComponent {
     });
     socket.onMessage("notification").subscribe((notification: Notification) => {
       if (notification.type == "game_end") {
-        this.gameEndNotification = notification.notification as GameEndNotification;
-      } else {
-        this.notifications.push(notification);
-        setTimeout(() => {
-          this.chatMessagesContainer.nativeElement.scrollTop = this.chatMessagesContainer.nativeElement.scrollHeight;
-        }, 100);
+        this.gameResult = notification.notification as GameEndNotification;
       }
+      this.notifications.push(notification);
+      setTimeout(() => {
+        this.chatMessagesContainer.nativeElement.scrollTop = this.chatMessagesContainer.nativeElement.scrollHeight;
+      }, 100);
     });
   }
   currentRequestId?: string;
@@ -98,6 +98,10 @@ export class GameComponent {
     this.chatInput = "";
   }
 
+  joinRematch(rematchId: string) {
+    window.location.href = "/?game=" + rematchId;
+  }
+
   protected readonly messageNotification = messageNotification;
   protected readonly millPlayedNotification = millPlayedNotification;
   protected readonly breweryPlayedNotification = breweryPlayedNotification;
@@ -109,4 +113,5 @@ export class GameComponent {
   protected readonly cardTakenNotification = cardTakenNotification;
   protected readonly meeplesSoldNotification = meeplesSoldNotification;
   protected readonly finalScoringNotification = finalScoringNotification;
+  protected readonly gameEndNotification = gameEndNotification;
 }

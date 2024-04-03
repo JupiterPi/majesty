@@ -23,39 +23,49 @@ class Lobby(val gameId: String) {
 val lobbies = mutableListOf<Lobby>()
 val games = mutableMapOf<String, Game>()
 
+fun createGameId(): String {
+    val id = (('A'..'Z') + ('a'..'z') + ('0'..'9')).let { chars -> List(8) { chars.random() }.joinToString("") }
+    return if (!games.keys.contains(id)) id else createGameId()
+}
+
 fun Application.configureController() {
     routing {
-        route("api/game/{id}") {
-            post("join") {
-                @Serializable
-                data class JoinGameDTO(val name: String)
-                val dto = call.receive<JoinGameDTO>()
-                val gameId: String = call.parameters["id"]!!
-
-                val lobby = lobbies.singleOrNull { it.gameId == gameId } ?: Lobby(gameId).also { lobbies += it }
-                lobby.players += Player(dto.name)
-
-                call.respondText("Joined player", status = HttpStatusCode.OK)
+        route("api") {
+            get("newGame") {
+                @Serializable data class NewGameDTO(val id: String)
+                call.respond(NewGameDTO(createGameId()))
             }
-            post("start") {
-                val gameId: String = call.parameters["id"]!!
-                val lobby = lobbies.singleOrNull { it.gameId == gameId } ?: return@post call.respondText("Lobby not found!", status = HttpStatusCode.NotFound)
-                if (lobby.players.size < 2 || lobby.players.size > 4) return@post call.respondText("Must be 2, 3, or 4 players!", status = HttpStatusCode.Forbidden)
-                lobbies -= lobby
-                val game = Game(lobby.players.shuffled())
-                game.players.forEach { it.game = game }
-                games[gameId] = game
+            route("game/{id}") {
+                post("join") {
+                    @Serializable data class JoinGameDTO(val name: String)
+                    val dto = call.receive<JoinGameDTO>()
+                    val gameId: String = call.parameters["id"]!!
 
-                call.respondText("Started game", status = HttpStatusCode.OK)
+                    val lobby = lobbies.singleOrNull { it.gameId == gameId } ?: Lobby(gameId).also { lobbies += it }
+                    lobby.players += Player(dto.name)
 
-                launch { game.run() }
-            }
+                    call.respondText("Joined player", status = HttpStatusCode.OK)
+                }
+                post("start") {
+                    val gameId: String = call.parameters["id"]!!
+                    val lobby = lobbies.singleOrNull { it.gameId == gameId } ?: return@post call.respondText("Lobby not found!", status = HttpStatusCode.NotFound)
+                    if (lobby.players.size < 2 || lobby.players.size > 4) return@post call.respondText("Must be 2, 3, or 4 players!", status = HttpStatusCode.Forbidden)
+                    lobbies -= lobby
+                    val game = Game(lobby.players.shuffled())
+                    game.players.forEach { it.game = game }
+                    games[gameId] = game
 
-            webSocket("game/{player}") {
-                val players = (games[call.parameters["id"]!!]?.players ?: lobbies.singleOrNull { it.gameId == call.parameters["id"]!! }?.players) ?: return@webSocket close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Invalid game id!"))
-                val player = players.singleOrNull { it.name == call.parameters["player"]!! } ?: return@webSocket close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Player not found!"))
+                    call.respondText("Started game", status = HttpStatusCode.OK)
 
-                player.handler.runResponseLoop(this)
+                    launch { game.run() }
+                }
+
+                webSocket("game/{player}") {
+                    val players = (games[call.parameters["id"]!!]?.players ?: lobbies.singleOrNull { it.gameId == call.parameters["id"]!! }?.players) ?: return@webSocket close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Invalid game id!"))
+                    val player = players.singleOrNull { it.name == call.parameters["player"]!! } ?: return@webSocket close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Player not found!"))
+
+                    player.handler.runResponseLoop(this)
+                }
             }
         }
     }

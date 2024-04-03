@@ -11,6 +11,7 @@
     Spiel-ID:
     <input [(ngModel)]="gameId" [disabled]="joined">
     <button (click)="join()" [disabled]="joined">Beitreten</button>
+    <button (click)="createGame()" [disabled]="gameId != '' || joined">Neues Spiel</button>
   </div>
 
   <div *ngIf="joined">

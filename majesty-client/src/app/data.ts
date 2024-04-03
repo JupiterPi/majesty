@@ -71,6 +71,9 @@ export function meeplesSoldNotification(notification: Notification) {
 export function finalScoringNotification(notification: Notification) {
   return notification.notification as {varietyScore: number, maxCards: {place: Place, score: number}[], infirmaryScore: number};
 }
+export function gameEndNotification(notification: Notification) {
+  return notification.notification as {winnerNames: string[], rematchId: string};
+}
 
 export interface GameEndNotification {
   winnerNames: string[];

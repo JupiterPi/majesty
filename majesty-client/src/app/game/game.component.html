@@ -3,9 +3,9 @@
     <div class="state" *ngIf="game?.activePlayerName != null && game!.activePlayerName != selfPlayer().name"><span>{{game!.activePlayerName}}</span> ist dran</div>
     <div class="state prompt" *ngIf="queueSelectable"><span>Du</span> bist dran</div>
     <div class="state prompt" *ngIf="placesSelectable.length > 0">Wähle einen Platz für die geheilte Karte!</div>
-    <div class="state prompt" *ngIf="gameEndNotification != undefined">
+    <div class="state prompt" *ngIf="gameResult != undefined">
       Spielende:
-      <ng-container *ngFor="let name of gameEndNotification!.winnerNames; let isLast = last"><span>{{name}}</span><span class="comma" *ngIf="!isLast">, </span></ng-container>
+      <ng-container *ngFor="let name of gameResult!.winnerNames; let isLast = last"><span>{{name}}</span><span class="comma" *ngIf="!isLast">, </span></ng-container>
       gewinnt!
     </div>
     Majesty Online
@@ -62,7 +62,7 @@
       </div>
       <div id="chat-messages-container" #chatMessagesContainer>
         <div class="notification" *ngFor="let notification of notifications" [class.no-flex]="notification.type == 'message'">
-          <span *ngIf="notification.type != 'message'">{{notification.playerName}}</span>
+          <span *ngIf="notification.type != 'message' && notification.type != 'game_end'">{{notification.playerName}}</span>
           <ng-container *ngIf="notification.type == 'message'">
             <span>{{notification.playerName}}: </span><div style="display: inline-block; width: 5px"></div><span>{{messageNotification(notification).message}}</span>
           </ng-container>
@@ -130,6 +130,9 @@
             <ng-container *ngIf="finalScoringNotification(notification).infirmaryScore == 0">nichts</ng-container>
             <ng-container *ngIf="finalScoringNotification(notification).infirmaryScore != 0"><span><div class="score-icon"></div> {{finalScoringNotification(notification).infirmaryScore}}</span></ng-container>
             durch verletzte Karten
+          </ng-container>
+          <ng-container *ngIf="notification.type == 'game_end'">
+            <span><a (click)="joinRematch(gameEndNotification(notification).rematchId)" style="cursor:pointer">Klicke hier, um erneut zu spielen</a></span>
           </ng-container>
         </div>
       </div>

@@ -50,7 +50,7 @@ class Game(
 
         val maxScore = players.maxOf { it.score }
         val winners = players.filter { it.score == maxScore }
-        sendNotification(null, GameEndNotification(winners.map { it.name }))
+        sendNotification(null, GameEndNotification(winners.map { it.name }, createGameId()))
 
         refreshGameState()
     }

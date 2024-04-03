@@ -88,4 +88,5 @@ data class FinalScoringNotification(
 @Notification("game_end")
 data class GameEndNotification(
     val winnerNames: List<String>,
+    val rematchId: String,
 )
