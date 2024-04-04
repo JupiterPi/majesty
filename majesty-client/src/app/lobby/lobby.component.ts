@@ -15,6 +15,7 @@ export class LobbyComponent {
   playerName = this.cookies.get("name") ?? "";
   gameId = "";
   joined = false;
+  lobbyPlayers: string[] = [];
 
   constructor(
     private cookies: CookieService,
@@ -41,8 +42,15 @@ export class LobbyComponent {
     this.api.joinGame(this.gameId, this.playerName).subscribe(() => {
       this.socket.connect(this.gameId, this.playerName, () => {
         this.joined = true;
+        this.socket.onMessage("lobby_players").subscribe((players: {players: string[]}) => {
+          this.lobbyPlayers = players.players;
+        });
       });
     });
+  }
+
+  leave() {
+    window.location.href = "";
   }
 
   copied = false;

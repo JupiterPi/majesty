@@ -11,14 +11,22 @@
     Spiel-ID:
     <input [(ngModel)]="gameId" [disabled]="joined">
     <button (click)="join()" [disabled]="joined">Beitreten</button>
-    <button (click)="createGame()" [disabled]="gameId != '' || joined">Neues Spiel</button>
+    <button (click)="createGame()" [disabled]="joined">Neues Spiel</button>
   </div>
 
-  <div *ngIf="joined">
-    Warten auf Spielstart...
-    <img src="assets/loader.svg" style="height: 25px">
-    <button (click)="copyLink()">{{copied ? "Kopiert" : "Link kopieren"}}</button>
-    <button (click)="startGame()">Start</button>
-  </div>
+  <ng-container *ngIf="joined">
+    <div>
+      Warten auf Spielstart...
+      <img src="assets/loader.svg" style="height: 25px">
+      <button (click)="copyLink()">{{copied ? "Kopiert" : "Link kopieren"}}</button>
+      <button (click)="leave()">Abbrechen</button>
+    </div>
+    <div>
+      Spieler:
+      {{lobbyPlayers.join(", ")}}
+      ({{lobbyPlayers.length}}/4)
+      <button (click)="startGame()" [disabled]="lobbyPlayers.length < 2 || lobbyPlayers.length > 4">Start</button>
+    </div>
+  </ng-container>
 
 </div>

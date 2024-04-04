@@ -43,6 +43,7 @@ fun Application.configureController() {
 
                     val lobby = lobbies.singleOrNull { it.gameId == gameId } ?: Lobby(gameId).also { lobbies += it }
                     lobby.players += Player(dto.name)
+                    lobby.players.forEach { it.handler.submitLobbyPlayers(lobby) }
 
                     call.respondText("Joined player", status = HttpStatusCode.OK)
                 }
@@ -61,10 +62,11 @@ fun Application.configureController() {
                 }
 
                 webSocket("game/{player}") {
-                    val players = (games[call.parameters["id"]!!]?.players ?: lobbies.singleOrNull { it.gameId == call.parameters["id"]!! }?.players) ?: return@webSocket close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Invalid game id!"))
+                    var lobby: Lobby? = null
+                    val players = (games[call.parameters["id"]!!]?.players ?: lobbies.singleOrNull { it.gameId == call.parameters["id"]!! }?.also { lobby = it }?.players) ?: return@webSocket close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Invalid game id!"))
                     val player = players.singleOrNull { it.name == call.parameters["player"]!! } ?: return@webSocket close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Player not found!"))
 
-                    player.handler.runResponseLoop(this)
+                    player.handler.runResponseLoop(this, lobby)
                 }
             }
         }
@@ -72,6 +74,11 @@ fun Application.configureController() {
 }
 
 class SocketHandler(private val player: Player) {
+    suspend fun submitLobbyPlayers(lobby: Lobby) {
+        @Serializable data class LobbyPlayersDTO(val players: List<String>)
+        sendPacket("lobby_players", LobbyPlayersDTO(lobby.players.map { it.name }))
+    }
+
     suspend fun refreshGameState() = sendPacket("game", GameDTO(player.game))
 
     @Serializable data class NotificationDTO<T>(val type: String, val playerName: String?, val notification: T)
@@ -106,8 +113,10 @@ class SocketHandler(private val player: Player) {
     @Serializable data class SocketRequest(val requestId: String, val type: String, val payload: String?)
     private val currentRequests = mutableListOf<SocketRequest>()
 
-    suspend fun runResponseLoop(session: DefaultWebSocketServerSession) {
+    suspend fun runResponseLoop(session: DefaultWebSocketServerSession, lobby: Lobby? = null) {
         this.session = session
+
+        if (lobby != null) submitLobbyPlayers(lobby)
 
         if (player.gameHasStarted) refreshGameState()
 
