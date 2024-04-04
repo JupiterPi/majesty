@@ -50,6 +50,7 @@ export class LobbyComponent {
   }
 
   leave() {
+    this.api.leaveGame(this.gameId, this.playerName).subscribe();
     window.location.href = "";
   }
 

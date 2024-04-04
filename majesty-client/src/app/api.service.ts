@@ -17,6 +17,10 @@ export class ApiService {
     return this.http.post(`${environment.apiRoot}/api/game/${gameId}/join`, {name}, {responseType: "text"});
   }
 
+  leaveGame(gameId: string, name: string) {
+    return this.http.post(`${environment.apiRoot}/api/game/${gameId}/leave`, {name}, {responseType: "text"});
+  }
+
   startGame(gameId: string) {
     return this.http.post(`${environment.apiRoot}/api/game/${gameId}/start`, null, {responseType: "text"});
   }

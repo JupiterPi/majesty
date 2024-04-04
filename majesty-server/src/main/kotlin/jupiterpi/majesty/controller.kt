@@ -18,6 +18,7 @@ import kotlin.reflect.full.findAnnotation
 
 class Lobby(val gameId: String) {
     val players = mutableListOf<Player>()
+    var started = false
 }
 
 val lobbies = mutableListOf<Lobby>()
@@ -47,11 +48,23 @@ fun Application.configureController() {
 
                     call.respondText("Joined player", status = HttpStatusCode.OK)
                 }
+                post("leave") {
+                    @Serializable data class LeaveGameDTO(val name: String)
+                    val dto = call.receive<LeaveGameDTO>()
+                    val gameId: String = call.parameters["id"]!!
+
+                    val lobby = lobbies.singleOrNull { it.gameId == gameId } ?: return@post call.respondText("Lobby not found!", status = HttpStatusCode.NotFound)
+                    lobby.players.removeAll { it.name == dto.name }
+                    lobby.players.forEach { it.handler.submitLobbyPlayers(lobby) }
+
+                    call.respondText("Leaved player", status = HttpStatusCode.OK)
+                }
+
                 post("start") {
                     val gameId: String = call.parameters["id"]!!
                     val lobby = lobbies.singleOrNull { it.gameId == gameId } ?: return@post call.respondText("Lobby not found!", status = HttpStatusCode.NotFound)
                     if (lobby.players.size < 2 || lobby.players.size > 4) return@post call.respondText("Must be 2, 3, or 4 players!", status = HttpStatusCode.Forbidden)
-                    lobbies -= lobby
+                    lobby.started = true; lobbies -= lobby
                     val game = Game(lobby.players.shuffled())
                     game.players.forEach { it.game = game }
                     games[gameId] = game
@@ -144,6 +157,11 @@ class SocketHandler(private val player: Player) {
             }
         } catch (e: ClosedReceiveChannelException) {
             this.session = null
+
+            if (lobby != null && !lobby.started) {
+                lobby.players -= player
+                lobby.players.forEach { it.handler.submitLobbyPlayers(lobby) }
+            }
         }
     }
 
